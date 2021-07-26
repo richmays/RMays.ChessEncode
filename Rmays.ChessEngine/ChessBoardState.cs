@@ -73,6 +73,11 @@ namespace Rmays.ChessEngine
             this.SideToMove = color;
         }
 
+        public ChessColor GetSideToMove()
+        {
+            return this.SideToMove;
+        }
+
         public void SetWhiteCanCastleKingside(bool canCastle)
         {
             this.WhiteCanCastleKingside = canCastle;
@@ -93,9 +98,13 @@ namespace Rmays.ChessEngine
             this.BlackCanCastleQueenside = canCastle;
         }
 
+        public void SetEnPassantCaptureSquare(int file, int rank)
+        {
+            this.EnPassantTargetSquare = ChessBoardSquare.GetAN(file, rank);
+        }
 
         /// <summary>
-        /// Remove all pieces from the board, and set the board's state to the default avlues.
+        /// Remove all pieces from the board, and set the board's state to the default values.
         /// </summary>
         public void Clear()
         {
@@ -278,6 +287,11 @@ namespace Rmays.ChessEngine
 
         private ChessColor GetSpotPieceColor(int f, int r)
         {
+            if (f < 1 || f > 8 || r < 1 || r > 8)
+            {
+                return ChessColor.None;
+            }
+
             var spot = this.chessBoard[f, r];
 
             return spot == 0 ? ChessColor.None
@@ -285,32 +299,88 @@ namespace Rmays.ChessEngine
                 : ChessColor.Black;
         }
 
-        private void MakeMove(ChessMove move)
+        private ChessPiece GetChessPieceFromAN(string AN)
         {
+            return this.chessBoard[AN[0] - 'a' + 1, AN[1] - '0'];
+        }
+
+        public bool TryMakeMove(int moveId)
+        {
+            var moves = PossibleMoves();
+            if (moveId <= moves.Count() && moveId >= 0)
+            {
+                var result = TryMakeMove(moves[moveId]);
+                if (result)
+                {
+                    Console.WriteLine("Making move: " + moveId);
+                }
+                else
+                {
+                    Console.WriteLine("Problem making move: " + moveId);
+                }
+                return result;
+            }
+            else
+            {
+                Console.WriteLine("Problem making move (out of range): " + moveId);
+                return false;
+            }
+        }
+
+        public bool TryMakeMove(ChessMove move)
+        {
+            if (move.Piece != GetChessPieceFromAN(move.StartSquare))
+            {
+                // Invalid move; the move's piece doesn't match the move's start square.
+                return false;
+            }
+
             // Make the move without checking whether or not it's legal.  We'll check it later if it puts one or both players into check.
             // Which piece made the move?
             if (move.KingsideCastle)
             {
+                // For castling, we'll do an early check-check.
+                // We can't castle across check; jump out if that's the case.
                 if (move.Piece == ChessPiece.WhiteKing)
                 {
                     WhiteCanCastleKingside = false;
                     WhiteCanCastleQueenside = false;
-                    this.chessBoard[1, 8] = ChessPiece.Space;
-                    this.chessBoard[1, 7] = ChessPiece.WhiteKing;
-                    this.chessBoard[1, 6] = ChessPiece.WhiteRook;
-                    this.chessBoard[1, 5] = ChessPiece.Space;
+
+                    // King jump square check
+                    this.chessBoard[5, 1] = ChessPiece.Space;
+                    this.chessBoard[6, 1] = ChessPiece.WhiteKing;
+                    if (this.IsOpponentInCheck())
+                    {
+                        this.chessBoard[5, 1] = ChessPiece.WhiteKing;
+                        this.chessBoard[6, 1] = ChessPiece.Space;
+                        return false;
+                    }
+
+                    this.chessBoard[8, 1] = ChessPiece.Space;
+                    this.chessBoard[7, 1] = ChessPiece.WhiteKing;
+                    this.chessBoard[6, 1] = ChessPiece.WhiteRook;
+                    this.chessBoard[5, 1] = ChessPiece.Space;
                 }
                 else if (move.Piece == ChessPiece.BlackKing)
                 {
                     BlackCanCastleKingside = false;
                     BlackCanCastleQueenside = false;
-                    this.chessBoard[8, 8] = ChessPiece.Space;
-                    this.chessBoard[8, 7] = ChessPiece.BlackKing;
-                    this.chessBoard[8, 6] = ChessPiece.BlackRook;
-                    this.chessBoard[8, 5] = ChessPiece.Space;
-                }
 
-                return;
+                    // King jump square check
+                    this.chessBoard[5, 8] = ChessPiece.Space;
+                    this.chessBoard[6, 8] = ChessPiece.BlackKing;
+                    if (this.IsOpponentInCheck())
+                    {
+                        this.chessBoard[5, 8] = ChessPiece.BlackKing;
+                        this.chessBoard[6, 8] = ChessPiece.Space;
+                        return false;
+                    }
+
+                    this.chessBoard[8, 8] = ChessPiece.Space;
+                    this.chessBoard[7, 8] = ChessPiece.BlackKing;
+                    this.chessBoard[6, 8] = ChessPiece.BlackRook;
+                    this.chessBoard[5, 8] = ChessPiece.Space;
+                }
             }
             else if (move.QueensideCastle)
             {
@@ -318,19 +388,41 @@ namespace Rmays.ChessEngine
                 {
                     WhiteCanCastleKingside = false;
                     WhiteCanCastleQueenside = false;
+
+                    // King jump square check
+                    this.chessBoard[5, 1] = ChessPiece.Space;
+                    this.chessBoard[4, 1] = ChessPiece.WhiteKing;
+                    if (this.IsOpponentInCheck())
+                    {
+                        this.chessBoard[5, 1] = ChessPiece.WhiteKing;
+                        this.chessBoard[4, 1] = ChessPiece.Space;
+                        return false;
+                    }
+
                     this.chessBoard[1, 1] = ChessPiece.Space;
-                    this.chessBoard[1, 3] = ChessPiece.WhiteKing;
-                    this.chessBoard[1, 4] = ChessPiece.WhiteRook;
-                    this.chessBoard[1, 5] = ChessPiece.Space;
+                    this.chessBoard[3, 1] = ChessPiece.WhiteKing;
+                    this.chessBoard[4, 1] = ChessPiece.WhiteRook;
+                    this.chessBoard[5, 1] = ChessPiece.Space;
                 }
                 else if (move.Piece == ChessPiece.BlackKing)
                 {
                     BlackCanCastleKingside = false;
                     BlackCanCastleQueenside = false;
-                    this.chessBoard[8, 1] = ChessPiece.Space;
-                    this.chessBoard[8, 3] = ChessPiece.BlackKing;
-                    this.chessBoard[8, 4] = ChessPiece.BlackRook;
-                    this.chessBoard[8, 5] = ChessPiece.Space;
+
+                    // King jump square check
+                    this.chessBoard[5, 8] = ChessPiece.Space;
+                    this.chessBoard[4, 8] = ChessPiece.BlackKing;
+                    if (this.IsOpponentInCheck())
+                    {
+                        this.chessBoard[5, 8] = ChessPiece.BlackKing;
+                        this.chessBoard[4, 8] = ChessPiece.Space;
+                        return false;
+                    }
+
+                    this.chessBoard[1, 8] = ChessPiece.Space;
+                    this.chessBoard[3, 8] = ChessPiece.BlackKing;
+                    this.chessBoard[4, 8] = ChessPiece.BlackRook;
+                    this.chessBoard[5, 8] = ChessPiece.Space;
                 }
             }
             else
@@ -380,8 +472,14 @@ namespace Rmays.ChessEngine
                 }
             }
 
+            if (this.IsPlayerInCheck())
+            {
+                return false;
+            }
+
             this.FullMoves++;
             this.SideToMove = (ChessColor)((int)this.SideToMove * -1);
+            return true;
         }
 
         /// <summary>
@@ -525,6 +623,17 @@ namespace Rmays.ChessEngine
                                             WasPieceCaptured = true
                                         });
                                     }
+
+                                    if (EnPassantTargetSquare == ChessBoardSquare.GetAN(f + deltaFile, r + deltaRank))
+                                    {
+                                        pieceMoves.Add(new ChessMove
+                                        {
+                                            Piece = spot,
+                                            StartSquare = ChessBoardSquare.GetAN(f, r),
+                                            EndSquare = ChessBoardSquare.GetAN(f + deltaFile, r + deltaRank),
+                                            WasPieceCaptured = true
+                                        });
+                                    }
                                 }
                             }
                             break;
@@ -653,7 +762,10 @@ namespace Rmays.ChessEngine
             foreach (var move in moves)
             {
                 ChessBoardState checkBoard = (ChessBoardState)this.Clone();
-                checkBoard.MakeMove(move);
+                if (!checkBoard.TryMakeMove(move))
+                {
+                    rejectedMoves.Add(move);
+                }
 
                 if (checkBoard.IsOpponentInCheck())
                 {
@@ -661,6 +773,75 @@ namespace Rmays.ChessEngine
                     rejectedMoves.Add(move);
                 }
 
+                // When the player castles, make sure the King isn't in check, AND not jumping over a check square.
+                if (move.KingsideCastle)
+                {
+                    if (this.IsPlayerInCheck())
+                    {
+                        rejectedMoves.Add(move);
+                    }
+
+                    if (checkBoard.SideToMove == ChessColor.Black)
+                    {
+                        // White made a move, so now it's Black's turn.  Make sure White's move was legal.
+                        this.chessBoard[5, 1] = ChessPiece.Space;
+                        this.chessBoard[6, 1] = ChessPiece.WhiteKing;
+                        if (this.IsPlayerInCheck())
+                        {
+                            rejectedMoves.Add(move);
+                        }
+
+                        this.chessBoard[5, 1] = ChessPiece.WhiteKing;
+                        this.chessBoard[6, 1] = ChessPiece.Space;
+                    }
+                    else if (checkBoard.SideToMove == ChessColor.White)
+                    {
+                        // Black made a move, so now it's White's turn.  Make sure Black's move was legal.
+                        this.chessBoard[5, 8] = ChessPiece.Space;
+                        this.chessBoard[6, 8] = ChessPiece.BlackKing;
+                        if (this.IsPlayerInCheck())
+                        {
+                            rejectedMoves.Add(move);
+                        }
+
+                        this.chessBoard[5, 8] = ChessPiece.BlackKing;
+                        this.chessBoard[6, 8] = ChessPiece.Space;
+                    }
+                }
+                else if (move.QueensideCastle)
+                {
+                    if (this.IsPlayerInCheck())
+                    {
+                        rejectedMoves.Add(move);
+                    }
+
+                    if (checkBoard.SideToMove == ChessColor.Black)
+                    {
+                        // White made a move, so now it's Black's turn.  Make sure White's move was legal.
+                        this.chessBoard[5, 1] = ChessPiece.Space;
+                        this.chessBoard[4, 1] = ChessPiece.WhiteKing;
+                        if (this.IsPlayerInCheck())
+                        {
+                            rejectedMoves.Add(move);
+                        }
+
+                        this.chessBoard[5, 1] = ChessPiece.WhiteKing;
+                        this.chessBoard[4, 1] = ChessPiece.Space;
+                    }
+                    else if (checkBoard.SideToMove == ChessColor.White)
+                    {
+                        // Black made a move, so now it's White's turn.  Make sure Black's move was legal.
+                        this.chessBoard[5, 8] = ChessPiece.Space;
+                        this.chessBoard[4, 8] = ChessPiece.BlackKing;
+                        if (this.IsPlayerInCheck())
+                        {
+                            rejectedMoves.Add(move);
+                        }
+
+                        this.chessBoard[5, 8] = ChessPiece.BlackKing;
+                        this.chessBoard[4, 8] = ChessPiece.Space;
+                    }
+                }
             }
 
             moves = moves.Where(x => !rejectedMoves.Contains(x)).ToList();
@@ -672,6 +853,14 @@ namespace Rmays.ChessEngine
                 .ThenBy(x => x.EndSquare[0])
                 .ThenBy(x => x.PawnPromotedTo.ToString())
                 .ToList();
+        }
+
+        private bool IsPlayerInCheck()
+        {
+            this.SideToMove = (this.SideToMove == ChessColor.White ? ChessColor.Black : ChessColor.White);
+            var result = IsOpponentInCheck();
+            this.SideToMove = (this.SideToMove == ChessColor.White ? ChessColor.Black : ChessColor.White);
+            return result;
         }
 
         private bool IsOpponentInCheck()
@@ -781,6 +970,21 @@ namespace Rmays.ChessEngine
 
             // We've checked all adjacent squares.  Return the moves we found.
             return moves;
+        }
+
+        public bool IsGameOver(out int gameResult)
+        {
+            gameResult = 0;
+            var totalMoves = PossibleMoves().Count();
+            if (totalMoves > 0)
+            {
+                return false;
+            }
+
+            // The game is over; who won?
+            // If the player is in check, it's a checkmate.  Otherwise, it's a stalemate.
+            gameResult = this.IsPlayerInCheck() ? -1 * (int)this.SideToMove : 0;
+            return true;
         }
 
         public object Clone()
