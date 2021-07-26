@@ -68,6 +68,39 @@ WR WN WB WQ WK WB WN WR".Trim(), board.ToString().Trim());
         }
 
         [TestMethod]
+        public void GetPossibleFirstMovesForBlack()
+        {
+            var board = new ChessBoardState();
+            board.TryMakeMove(5); // White moves a pawn.
+
+            var expectedMoves = new List<string>
+            {
+                "Pa7-a5",
+                "Pa7-a6",
+                "Pb7-b5",
+                "Pb7-b6",
+                "Pc7-c5",
+                "Pc7-c6",
+                "Pd7-d5",
+                "Pd7-d6",
+                "Pe7-e5",
+                "Pe7-e6",
+                "Pf7-f5",
+                "Pf7-f6",
+                "Pg7-g5",
+                "Pg7-g6",
+                "Ph7-h5",
+                "Ph7-h6",
+                "Nb8-a6",
+                "Nb8-c6",
+                "Ng8-f6",
+                "Ng8-h6"
+            };
+
+            CheckPossibleMoves(board, expectedMoves);
+        }
+
+        [TestMethod]
         public void GetMoves_WhiteKnight()
         {
             GetMoves_Knight(ChessColor.White);
@@ -107,6 +140,23 @@ WR WN WB WQ WK WB WN WR".Trim(), board.ToString().Trim());
             var board = new ChessBoardState();
             board.Clear();
             board.SetSpot(1, 1, ChessPiece.WhiteKnight);
+
+            var expectedMoves = new List<string>
+            {
+                "Na1-c2",
+                "Na1-b3"
+            };
+
+            CheckPossibleMoves(board, expectedMoves);
+        }
+
+        [TestMethod]
+        public void GetMoves_BlackKnight_Corner()
+        {
+            var board = new ChessBoardState();
+            board.Clear();
+            board.SetSideToMove(ChessColor.Black);
+            board.SetSpot(1, 1, ChessPiece.BlackKnight);
 
             var expectedMoves = new List<string>
             {
@@ -244,6 +294,197 @@ WR WN WB WQ WK WB WN WR".Trim(), board.ToString().Trim());
                 "Ke1-d1",
                 "Ke1-f1",
                 "O-O",
+
+                // H1 Rook
+                "Rh1-f1",
+                "Rh1-g1",
+                "Rh1xh2"
+            };
+
+            CheckPossibleMoves(board, expectedMoves);
+        }
+
+        [TestMethod]
+        public void GetMoves_WhiteKing_CantCastleWhileInCheck()
+        {
+            var board = new ChessBoardState();
+            board.Clear();
+            board.SetSpot(5, 1, ChessPiece.WhiteKing);
+            board.SetSpot(1, 1, ChessPiece.WhiteRook);
+            board.SetSpot(8, 1, ChessPiece.WhiteRook);
+            board.SetSpot(1, 2, ChessPiece.BlackRook);
+            board.SetSpot(8, 2, ChessPiece.BlackRook);
+            board.SetSpot(5, 8, ChessPiece.BlackRook);
+
+            board.SetWhiteCanCastleKingside(true);
+            board.SetWhiteCanCastleQueenside(true);
+
+            // White is able to castle, but can't because they're in check.  They can only move their king out of the way.
+            var expectedMoves = new List<string>
+            {
+                // A1 Rook
+                //"Ra1-b1",
+                //"Ra1-c1",
+                //"Ra1-d1",
+                //"Ra1xa2",
+
+                // King
+                //"O-O-O",
+                "Ke1-d1",
+                "Ke1-f1",
+                //"O-O",
+
+                // H1 Rook
+                //"Rh1-f1",
+                //"Rh1-g1",
+                //"Rh1xh2"
+            };
+
+            CheckPossibleMoves(board, expectedMoves);
+        }
+
+        [TestMethod]
+        public void GetMoves_WhiteKing_CastleRights_AcrossCheck_QSDest()
+        {
+            var board = new ChessBoardState();
+            board.Clear();
+            board.SetSpot(5, 1, ChessPiece.WhiteKing);
+            board.SetSpot(5, 8, ChessPiece.BlackKing);
+            board.SetSpot(1, 1, ChessPiece.WhiteRook);
+            board.SetSpot(8, 1, ChessPiece.WhiteRook);
+            board.SetSpot(1, 2, ChessPiece.BlackRook);
+            board.SetSpot(3, 3, ChessPiece.BlackRook); // King can't castle queenside when there's a Black Rook on this square.
+            board.SetSpot(8, 2, ChessPiece.BlackRook);
+            board.SetWhiteCanCastleKingside(true);
+            board.SetWhiteCanCastleQueenside(true);
+
+            var expectedMoves = new List<string>
+            {
+                // A1 Rook
+                "Ra1-b1",
+                "Ra1-c1",
+                "Ra1-d1",
+                "Ra1xa2",
+
+                // King
+                //"O-O-O",
+                "Ke1-d1",
+                "Ke1-f1",
+                "O-O",
+
+                // H1 Rook
+                "Rh1-f1",
+                "Rh1-g1",
+                "Rh1xh2"
+            };
+
+            CheckPossibleMoves(board, expectedMoves);
+        }
+
+        [TestMethod]
+        public void GetMoves_WhiteKing_CastleRights_AcrossCheck_QSJump()
+        {
+            var board = new ChessBoardState();
+            board.Clear();
+            board.SetSpot(5, 1, ChessPiece.WhiteKing);
+            board.SetSpot(5, 8, ChessPiece.BlackKing);
+            board.SetSpot(1, 1, ChessPiece.WhiteRook);
+            board.SetSpot(8, 1, ChessPiece.WhiteRook);
+            board.SetSpot(1, 2, ChessPiece.BlackRook);
+            board.SetSpot(4, 3, ChessPiece.BlackRook); // King can't castle queenside when there's a Black Rook on this square.
+            board.SetSpot(8, 2, ChessPiece.BlackRook);
+            board.SetWhiteCanCastleKingside(true);
+            board.SetWhiteCanCastleQueenside(true);
+
+            var expectedMoves = new List<string>
+            {
+                // A1 Rook
+                "Ra1-b1",
+                "Ra1-c1",
+                "Ra1-d1",
+                "Ra1xa2",
+
+                // King
+                //"O-O-O",
+                //"Ke1-d1",
+                "Ke1-f1",
+                "O-O",
+
+                // H1 Rook
+                "Rh1-f1",
+                "Rh1-g1",
+                "Rh1xh2"
+            };
+
+            CheckPossibleMoves(board, expectedMoves);
+        }
+
+        [TestMethod]
+        public void GetMoves_WhiteKing_CastleRights_AcrossCheck_KSDest()
+        {
+            var board = new ChessBoardState();
+            board.Clear();
+            board.SetSpot(5, 1, ChessPiece.WhiteKing);
+            board.SetSpot(5, 8, ChessPiece.BlackKing);
+            board.SetSpot(1, 1, ChessPiece.WhiteRook);
+            board.SetSpot(8, 1, ChessPiece.WhiteRook);
+            board.SetSpot(1, 2, ChessPiece.BlackRook);
+            board.SetSpot(7, 3, ChessPiece.BlackRook); // King can't castle kingside when there's a Black Rook on this square.
+            board.SetSpot(8, 2, ChessPiece.BlackRook);
+            board.SetWhiteCanCastleKingside(true);
+            board.SetWhiteCanCastleQueenside(true);
+
+            var expectedMoves = new List<string>
+            {
+                // A1 Rook
+                "Ra1-b1",
+                "Ra1-c1",
+                "Ra1-d1",
+                "Ra1xa2",
+
+                // King
+                "O-O-O",
+                "Ke1-d1",
+                "Ke1-f1",
+                //"O-O",
+
+                // H1 Rook
+                "Rh1-f1",
+                "Rh1-g1",
+                "Rh1xh2"
+            };
+
+            CheckPossibleMoves(board, expectedMoves);
+        }
+
+        [TestMethod]
+        public void GetMoves_WhiteKing_CastleRights_AcrossCheck_KSJump()
+        {
+            var board = new ChessBoardState();
+            board.Clear();
+            board.SetSpot(5, 1, ChessPiece.WhiteKing);
+            board.SetSpot(5, 8, ChessPiece.BlackKing);
+            board.SetSpot(1, 1, ChessPiece.WhiteRook);
+            board.SetSpot(8, 1, ChessPiece.WhiteRook);
+            board.SetSpot(1, 2, ChessPiece.BlackRook);
+            board.SetSpot(6, 3, ChessPiece.BlackRook); // King can't castle kingside when there's a Black Rook on this square.
+            board.SetSpot(8, 2, ChessPiece.BlackRook);
+            board.SetWhiteCanCastleKingside(true);
+            board.SetWhiteCanCastleQueenside(true);
+
+            var expectedMoves = new List<string>
+            {
+                // A1 Rook
+                "Ra1-b1",
+                "Ra1-c1",
+                "Ra1-d1",
+                "Ra1xa2",
+
+                // King
+                "O-O-O",
+                "Ke1-d1",
+                //"Ke1-f1",
+                //"O-O",
 
                 // H1 Rook
                 "Rh1-f1",
@@ -522,6 +763,178 @@ WR WN WB WQ WK WB WN WR".Trim(), board.ToString().Trim());
             };
 
             CheckPossibleMoves(board, expectedMoves);
+        }
+
+        /// <summary>
+        /// Players are allowed to make a move that puts their opponent's king into check.
+        /// (Probably obvious, but it's important to verify.)
+        /// </summary>
+        [TestMethod]
+        public void GetMoves_WhiteCanDeliverCheck()
+        {
+            var board = new ChessBoardState();
+            board.Clear();
+            board.SetSpot(1, 1, ChessPiece.WhiteRook);
+            board.SetSpot(5, 1, ChessPiece.WhiteKing);
+            board.SetSpot(5, 8, ChessPiece.BlackKing);
+            board.SetSpot(1, 8, ChessPiece.BlackRook);
+
+            var expectedMoves = new List<string>
+            {
+                "Ra1-b1",
+                "Ra1-c1",
+                "Ra1-d1",
+                "Ra1-a2",
+                "Ra1-a3",
+                "Ra1-a4",
+                "Ra1-a5",
+                "Ra1-a6",
+                "Ra1-a7",
+                "Ra1xa8",
+                "Ke1-d1",
+                "Ke1-f1",
+                "Ke1-d2",
+                "Ke1-e2",
+                "Ke1-f2",
+            };
+
+            CheckPossibleMoves(board, expectedMoves);
+        }
+
+        /// <summary>
+        /// Simple checkmate; it's white's turn, but they're in check and they can't move.
+        /// </summary>
+        [TestMethod]
+        public void GetMoves_Checkmate()
+        {
+            var board = new ChessBoardState();
+            board.Clear();
+            board.SetSideToMove(ChessColor.White);
+            board.SetSpot(5, 1, ChessPiece.WhiteKing);
+            board.SetSpot(5, 8, ChessPiece.BlackKing);
+            board.SetSpot(1, 1, ChessPiece.BlackRook);
+            board.SetSpot(2, 2, ChessPiece.BlackRook);
+
+            var expectedMoves = new List<string>
+            {
+            };
+
+            CheckPossibleMoves(board, expectedMoves);
+            var isGameOver = board.IsGameOver(out int gameResult);
+            Assert.IsTrue(isGameOver, "The game should be over, but it's not.");
+            Assert.AreEqual(-1, gameResult, $"Black should be the winner, but they're not.  Expected result of -1 (Black wins), but result was {gameResult}.");
+        }
+
+        /// <summary>
+        /// Simple stalemate; it's white's turn, but they're NOT in check and they can't move.
+        /// </summary>
+        [TestMethod]
+        public void GetMoves_Stalemate()
+        {
+            var board = new ChessBoardState();
+            board.Clear();
+            board.SetSideToMove(ChessColor.White);
+            board.SetSpot(5, 1, ChessPiece.WhiteKing);
+            board.SetSpot(5, 8, ChessPiece.BlackKing);
+            board.SetSpot(4, 8, ChessPiece.BlackRook);
+            board.SetSpot(6, 8, ChessPiece.BlackRook);
+            board.SetSpot(2, 2, ChessPiece.BlackRook);
+
+            var expectedMoves = new List<string>
+            {
+            };
+
+            CheckPossibleMoves(board, expectedMoves);
+            var isGameOver = board.IsGameOver(out int gameResult);
+            Assert.IsTrue(isGameOver, "The game should be over, but it's not.");
+            Assert.AreEqual(0, gameResult, $"The game should be a stalemate, but it's not.  Expected result of 0 (stalemate), but result was {gameResult}.");
+        }
+
+        /// <summary>
+        /// White's turn; they can take black's pawn en passant in two ways.
+        /// </summary>
+        [TestMethod]
+        public void GetMoves_WhitePawn_EnPassant()
+        {
+            var board = new ChessBoardState();
+            board.Clear();
+            board.SetSideToMove(ChessColor.White);
+            board.SetSpot(5, 1, ChessPiece.WhiteKing);
+            board.SetSpot(5, 8, ChessPiece.BlackKing);
+
+            // Black's pawn has doublemoved.
+            board.SetSpot(3, 5, ChessPiece.BlackPawn);
+
+            // White has two pawns that could capture it.
+            board.SetSpot(2, 5, ChessPiece.WhitePawn);
+            board.SetSpot(4, 5, ChessPiece.WhitePawn);
+
+            board.SetEnPassantCaptureSquare(3, 6);
+
+            var expectedMoves = new List<string>
+            {
+                "Ke1-d1",
+                "Ke1-f1",
+                "Ke1-d2",
+                "Ke1-e2",
+                "Ke1-f2",
+
+                "Pb5-b6",
+                "Pb5xc6", // En Passant Capture
+
+                "Pd5xc6", // En Passant Capture
+                "Pd5-d6"
+            };
+
+            CheckPossibleMoves(board, expectedMoves);
+        }
+
+        /// <summary>
+        /// Scholar's mate; make the moves, and White wins with a checkmate.
+        /// </summary>
+        [TestMethod]
+        public void GetMoves_ScholarsMate()
+        {
+            var board = new ChessBoardState();
+            PrintBoardState(board);
+            board.TryMakeMove(13); // Pe2-e4
+            PrintBoardState(board);
+            board.TryMakeMove(8);  //          .. Pe7-e5
+            PrintBoardState(board);
+            board.TryMakeMove(9);  // Bf1-c4
+            PrintBoardState(board);
+            board.TryMakeMove(15);  //          .. Nb8-c6
+            PrintBoardState(board);
+            board.TryMakeMove(5);  // Qd1-h5
+            PrintBoardState(board);
+            board.TryMakeMove(25);  //          .. Ng8-f6
+            PrintBoardState(board);
+            board.TryMakeMove(41);  // Qh5-f7++
+            PrintBoardState(board);
+
+            var expectedMoves = new List<string>
+            {
+            };
+
+            CheckPossibleMoves(board, expectedMoves);
+
+            var isGameOver = board.IsGameOver(out int gameResult);
+            Assert.IsTrue(isGameOver, "The game should be over, but it's not.");
+            Assert.AreEqual(1, gameResult, $"The game should be a White win, but it's not.  Expected result of 1 (White wins), but result was {gameResult}.");
+        }
+
+        private void PrintBoardState(ChessBoardState board)
+        {
+            Console.WriteLine("******************************************");
+            Console.WriteLine((board.GetSideToMove() == ChessColor.White ? "White" : "Black") + "'s turn.");
+            var moves = board.PossibleMoves().Select(x => x.ToString()).ToList();
+            Console.WriteLine(board);
+            int moveId = 0;
+            foreach (var move in moves)
+            {
+                Console.WriteLine($"{moveId}: {move}");
+                moveId++;
+            }
         }
 
         private void CheckPossibleMoves(ChessBoardState board, List<string> expectedMoves)
