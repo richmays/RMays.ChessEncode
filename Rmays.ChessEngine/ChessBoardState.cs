@@ -11,7 +11,7 @@ namespace Rmays.ChessEngine
     /// whether or not each side can castle (and which way), if an en passant capture is possible, and how many moves
     /// have occurred since the last capture / pawn move.)  Can be converted to a FEN representation.
     /// </summary>
-    public class ChessBoardState
+    public class ChessBoardState : ICloneable
     {
         protected ChessPiece[,] chessBoard;
         protected ChessColor SideToMove = ChessColor.White;
@@ -50,10 +50,49 @@ namespace Rmays.ChessEngine
             Initialize();
         }
 
+        public ChessBoardState(ChessBoardState orig)
+        {
+            this.chessBoard = orig.chessBoard;
+            this.SideToMove = orig.SideToMove;
+            this.WhiteCanCastleKingside = orig.WhiteCanCastleKingside;
+            this.WhiteCanCastleQueenside = orig.WhiteCanCastleQueenside;
+            this.BlackCanCastleKingside = orig.BlackCanCastleKingside;
+            this.BlackCanCastleQueenside = orig.BlackCanCastleQueenside;
+            this.EnPassantTargetSquare = orig.EnPassantTargetSquare;
+            this.HalfMoveClock = orig.HalfMoveClock;
+            this.FullMoves = orig.FullMoves;
+        }
+
         public void SetSpot(int f, int r, ChessPiece piece)
         {
             this.chessBoard[f, r] = piece;
         }
+
+        public void SetSideToMove(ChessColor color)
+        {
+            this.SideToMove = color;
+        }
+
+        public void SetWhiteCanCastleKingside(bool canCastle)
+        {
+            this.WhiteCanCastleKingside = canCastle;
+        }
+
+        public void SetWhiteCanCastleQueenside(bool canCastle)
+        {
+            this.WhiteCanCastleQueenside = canCastle;
+        }
+
+        public void SetBlackCanCastleKingside(bool canCastle)
+        {
+            this.BlackCanCastleKingside = canCastle;
+        }
+
+        public void SetBlackCanCastleQueenside(bool canCastle)
+        {
+            this.BlackCanCastleQueenside = canCastle;
+        }
+
 
         /// <summary>
         /// Remove all pieces from the board, and set the board's state to the default avlues.
@@ -246,7 +285,104 @@ namespace Rmays.ChessEngine
                 : ChessColor.Black;
         }
 
+        private void MakeMove(ChessMove move)
+        {
+            // Make the move without checking whether or not it's legal.  We'll check it later if it puts one or both players into check.
+            // Which piece made the move?
+            if (move.KingsideCastle)
+            {
+                if (move.Piece == ChessPiece.WhiteKing)
+                {
+                    WhiteCanCastleKingside = false;
+                    WhiteCanCastleQueenside = false;
+                    this.chessBoard[1, 8] = ChessPiece.Space;
+                    this.chessBoard[1, 7] = ChessPiece.WhiteKing;
+                    this.chessBoard[1, 6] = ChessPiece.WhiteRook;
+                    this.chessBoard[1, 5] = ChessPiece.Space;
+                }
+                else if (move.Piece == ChessPiece.BlackKing)
+                {
+                    BlackCanCastleKingside = false;
+                    BlackCanCastleQueenside = false;
+                    this.chessBoard[8, 8] = ChessPiece.Space;
+                    this.chessBoard[8, 7] = ChessPiece.BlackKing;
+                    this.chessBoard[8, 6] = ChessPiece.BlackRook;
+                    this.chessBoard[8, 5] = ChessPiece.Space;
+                }
 
+                return;
+            }
+            else if (move.QueensideCastle)
+            {
+                if (move.Piece == ChessPiece.WhiteKing)
+                {
+                    WhiteCanCastleKingside = false;
+                    WhiteCanCastleQueenside = false;
+                    this.chessBoard[1, 1] = ChessPiece.Space;
+                    this.chessBoard[1, 3] = ChessPiece.WhiteKing;
+                    this.chessBoard[1, 4] = ChessPiece.WhiteRook;
+                    this.chessBoard[1, 5] = ChessPiece.Space;
+                }
+                else if (move.Piece == ChessPiece.BlackKing)
+                {
+                    BlackCanCastleKingside = false;
+                    BlackCanCastleQueenside = false;
+                    this.chessBoard[8, 1] = ChessPiece.Space;
+                    this.chessBoard[8, 3] = ChessPiece.BlackKing;
+                    this.chessBoard[8, 4] = ChessPiece.BlackRook;
+                    this.chessBoard[8, 5] = ChessPiece.Space;
+                }
+            }
+            else
+            {
+                this.chessBoard[move.StartSquare[0] - 'a' + 1, move.StartSquare[1] - '0'] = ChessPiece.Space;
+                if (move.PawnPromotedTo == PromotionChessPiece.None)
+                {
+                    this.chessBoard[move.EndSquare[0] - 'a' + 1, move.EndSquare[1] - '0'] = move.Piece;
+                }
+                else
+                {
+                    var targetPiece = (ChessPiece)((int)move.PawnPromotedTo * (move.Piece.ToString().StartsWith("W") ? 1 : -1));
+                    this.chessBoard[move.EndSquare[0] - 'a' + 1, move.EndSquare[1] - '0'] = targetPiece;
+                }
+
+                if (move.Piece == ChessPiece.WhiteKing)
+                {
+                    WhiteCanCastleKingside = false;
+                    WhiteCanCastleQueenside = false;
+                }
+                else if (move.Piece == ChessPiece.BlackKing)
+                {
+                    BlackCanCastleKingside = false;
+                    BlackCanCastleQueenside = false;
+                }
+                else if (move.Piece == ChessPiece.WhiteRook)
+                {
+                    if (move.StartSquare == "a1")
+                    {
+                        WhiteCanCastleQueenside = false;
+                    }
+                    else if (move.StartSquare == "h1")
+                    {
+                        WhiteCanCastleKingside = false;
+                    }
+                }
+                else if (move.Piece == ChessPiece.BlackRook)
+                {
+                    if (move.StartSquare == "a8")
+                    {
+                        BlackCanCastleQueenside = false;
+                    }
+                    else if (move.StartSquare == "h8")
+                    {
+                        BlackCanCastleKingside = false;
+                    }
+                }
+            }
+
+            this.FullMoves++;
+            this.SideToMove = (ChessColor)((int)this.SideToMove * -1);
+        }
 
         /// <summary>
         /// Returns an ordered list of chess moves from the given position.
@@ -254,7 +390,7 @@ namespace Rmays.ChessEngine
         /// find all moves that piece can make (destination square starting with a1 to a8, then b1 to b8, etc).
         /// </summary>
         /// <returns></returns>
-        public List<ChessMove> PossibleMoves()
+        public List<ChessMove> PossibleMoves(bool onlyReturnCaptures = false)
         {
             var moves = new List<ChessMove>();
             for (var r = 1; r <= 8; r++)
@@ -268,114 +404,125 @@ namespace Rmays.ChessEngine
                     switch (Math.Abs((int)spot))
                     {
                         case 1: // pawn
-                            if (this.SideToMove == ChessColor.White)
+                            // deltaRank is the change in rank for each pawn move.
+                            // White will increase their rank with each move, Black will decrease their rank.
+                            var deltaRank = (int)SideToMove;
+                            if ((SideToMove == ChessColor.White && r == 7) || (SideToMove == ChessColor.Black && r == 2))
                             {
-                                if (r == 2)
+                                // Push + Promotion
+                                if (this.chessBoard[f, r + deltaRank] == ChessPiece.Space)
                                 {
-                                    // Starting row; can double-push
-                                    if (this.chessBoard[f, r + 1] == ChessPiece.Space)
+                                    pieceMoves.Add(new ChessMove
                                     {
-                                        pieceMoves.Add(new ChessMove
-                                        {
-                                            Piece = spot,
-                                            StartSquare = ChessBoardSquare.GetAN(f, r),
-                                            EndSquare = ChessBoardSquare.GetAN(f, r + 1)
-                                        });
-
-                                        if (this.chessBoard[f, r + 2] == ChessPiece.Space)
-                                        {
-                                            pieceMoves.Add(new ChessMove
-                                            {
-                                                Piece = spot,
-                                                StartSquare = ChessBoardSquare.GetAN(f, r),
-                                                EndSquare = ChessBoardSquare.GetAN(f, r + 2)
-                                            });
-                                        }
-                                    }
+                                        Piece = spot,
+                                        StartSquare = ChessBoardSquare.GetAN(f, r),
+                                        EndSquare = ChessBoardSquare.GetAN(f, r + deltaRank),
+                                        PawnPromotedTo = PromotionChessPiece.Bishop
+                                    });
+                                    pieceMoves.Add(new ChessMove
+                                    {
+                                        Piece = spot,
+                                        StartSquare = ChessBoardSquare.GetAN(f, r),
+                                        EndSquare = ChessBoardSquare.GetAN(f, r + deltaRank),
+                                        PawnPromotedTo = PromotionChessPiece.Knight
+                                    });
+                                    pieceMoves.Add(new ChessMove
+                                    {
+                                        Piece = spot,
+                                        StartSquare = ChessBoardSquare.GetAN(f, r),
+                                        EndSquare = ChessBoardSquare.GetAN(f, r + deltaRank),
+                                        PawnPromotedTo = PromotionChessPiece.Queen
+                                    });
+                                    pieceMoves.Add(new ChessMove
+                                    {
+                                        Piece = spot,
+                                        StartSquare = ChessBoardSquare.GetAN(f, r),
+                                        EndSquare = ChessBoardSquare.GetAN(f, r + deltaRank),
+                                        PawnPromotedTo = PromotionChessPiece.Rook
+                                    });
                                 }
-                                else if (r == 7)
+
+                                // Capture + Promotion
+                                // Look for capture forward-left and forward-right.
+                                for (var deltaFile = -1; deltaFile <= 1; deltaFile += 2)
                                 {
-                                    // Promotion
-                                    if (this.chessBoard[f, r + 1] == ChessPiece.Space)
+                                    if (this.GetSpotPieceColor(f + deltaFile, r + deltaRank) == (ChessColor)(-1 * (int)SideToMove))
                                     {
                                         pieceMoves.Add(new ChessMove
                                         {
                                             Piece = spot,
                                             StartSquare = ChessBoardSquare.GetAN(f, r),
-                                            EndSquare = ChessBoardSquare.GetAN(f, r + 1),
+                                            EndSquare = ChessBoardSquare.GetAN(f + deltaFile, r + deltaRank),
+                                            WasPieceCaptured = true,
                                             PawnPromotedTo = PromotionChessPiece.Bishop
                                         });
                                         pieceMoves.Add(new ChessMove
                                         {
                                             Piece = spot,
                                             StartSquare = ChessBoardSquare.GetAN(f, r),
-                                            EndSquare = ChessBoardSquare.GetAN(f, r + 1),
+                                            EndSquare = ChessBoardSquare.GetAN(f + deltaFile, r + deltaRank),
+                                            WasPieceCaptured = true,
                                             PawnPromotedTo = PromotionChessPiece.Knight
                                         });
                                         pieceMoves.Add(new ChessMove
                                         {
                                             Piece = spot,
                                             StartSquare = ChessBoardSquare.GetAN(f, r),
-                                            EndSquare = ChessBoardSquare.GetAN(f, r + 1),
+                                            EndSquare = ChessBoardSquare.GetAN(f + deltaFile, r + deltaRank),
+                                            WasPieceCaptured = true,
                                             PawnPromotedTo = PromotionChessPiece.Queen
                                         });
                                         pieceMoves.Add(new ChessMove
                                         {
                                             Piece = spot,
                                             StartSquare = ChessBoardSquare.GetAN(f, r),
-                                            EndSquare = ChessBoardSquare.GetAN(f, r + 1),
+                                            EndSquare = ChessBoardSquare.GetAN(f + deltaFile, r + deltaRank),
+                                            WasPieceCaptured = true,
                                             PawnPromotedTo = PromotionChessPiece.Rook
                                         });
                                     }
                                 }
-                                else
+                            }
+                            else
+                            {
+                                if ((SideToMove == ChessColor.White && r == 2) || (SideToMove == ChessColor.Black && r == 7))
                                 {
-                                    // Push
-                                    if (this.chessBoard[f, r + 1] == ChessPiece.Space)
+                                    // Starting row; can double-push
+                                    if (this.chessBoard[f, r + deltaRank] == ChessPiece.Space
+                                        && this.chessBoard[f, r + deltaRank + deltaRank] == ChessPiece.Space)
                                     {
                                         pieceMoves.Add(new ChessMove
                                         {
                                             Piece = spot,
                                             StartSquare = ChessBoardSquare.GetAN(f, r),
-                                            EndSquare = ChessBoardSquare.GetAN(f, r + 1)
+                                            EndSquare = ChessBoardSquare.GetAN(f, r + deltaRank + deltaRank)
                                         });
                                     }
                                 }
 
-                                // Check for captures
-                                if (this.SpotHasCapturableEnemyPiece(ChessColor.White, ChessBoardSquare.GetAN(f + 1, r + 1)))
+                                // Try pushing pawn forward.
+                                if (this.chessBoard[f, r + deltaRank] == ChessPiece.Space)
                                 {
+                                    // Push pawn
                                     pieceMoves.Add(new ChessMove
                                     {
                                         Piece = spot,
-                                        WasPieceCaptured = true,
                                         StartSquare = ChessBoardSquare.GetAN(f, r),
-                                        EndSquare = ChessBoardSquare.GetAN(f + 1, r + 1)
-                                    });
-                                }
-                                else if (this.SpotHasCapturableEnemyPiece(ChessColor.White, ChessBoardSquare.GetAN(f - 1, r + 1)))
-                                {
-                                    pieceMoves.Add(new ChessMove
-                                    {
-                                        Piece = spot,
-                                        WasPieceCaptured = true,
-                                        StartSquare = ChessBoardSquare.GetAN(f, r),
-                                        EndSquare = ChessBoardSquare.GetAN(f - 1, r + 1)
+                                        EndSquare = ChessBoardSquare.GetAN(f, r + deltaRank)
                                     });
                                 }
 
-                            }
-                            else if (this.SideToMove == ChessColor.Black)
-                            {
-                                if (r == 7)
+                                // Check for captures.
+                                for (var deltaFile = -1; deltaFile <= 1; deltaFile += 2)
                                 {
-                                    if (this.chessBoard[f, r - 1] == ChessPiece.Space && this.chessBoard[f, r - 2] == ChessPiece.Space)
+                                    if (this.GetSpotPieceColor(f + deltaFile, r + deltaRank) == (ChessColor)(-1 * (int)SideToMove))
                                     {
                                         pieceMoves.Add(new ChessMove
                                         {
-                                            Piece = ChessPiece.BlackPawn,
+                                            Piece = spot,
                                             StartSquare = ChessBoardSquare.GetAN(f, r),
-                                            EndSquare = ChessBoardSquare.GetAN(f, r - 2)
+                                            EndSquare = ChessBoardSquare.GetAN(f + deltaFile, r + deltaRank),
+                                            WasPieceCaptured = true
                                         });
                                     }
                                 }
@@ -425,6 +572,68 @@ namespace Rmays.ChessEngine
                             break;
                         case 6: // King
                             pieceMoves.AddRange(GetAdjacentMoves(f, r, spot));
+                            if (this.SideToMove == ChessColor.White)
+                            {
+                                if (this.chessBoard[5,1] == ChessPiece.WhiteKing)
+                                {
+                                    if (this.chessBoard[1, 1] == ChessPiece.WhiteRook
+                                        && this.chessBoard[2, 1] == ChessPiece.Space && this.chessBoard[3, 1] == ChessPiece.Space && this.chessBoard[4, 1] == ChessPiece.Space
+                                        && this.WhiteCanCastleQueenside)
+                                    {
+                                        pieceMoves.Add(new ChessMove
+                                        {
+                                            Piece = ChessPiece.WhiteKing,
+                                            StartSquare = "e1",
+                                            EndSquare = "c1",
+                                            QueensideCastle = true
+                                        });
+                                    }
+
+                                    if (this.chessBoard[8, 1] == ChessPiece.WhiteRook
+                                        && this.chessBoard[7, 1] == ChessPiece.Space && this.chessBoard[6, 1] == ChessPiece.Space
+                                        && this.WhiteCanCastleKingside)
+                                    {
+                                        pieceMoves.Add(new ChessMove
+                                        {
+                                            Piece = ChessPiece.WhiteKing,
+                                            StartSquare = "e1",
+                                            EndSquare = "g1",
+                                            KingsideCastle = true
+                                        });
+                                    }
+                                }
+                            }
+                            else if (this.SideToMove == ChessColor.Black)
+                            {
+                                if (this.chessBoard[5, 8] == ChessPiece.BlackKing)
+                                {
+                                    if (this.chessBoard[1, 8] == ChessPiece.BlackRook
+                                        && this.chessBoard[2, 8] == ChessPiece.Space && this.chessBoard[3, 8] == ChessPiece.Space && this.chessBoard[4, 8] == ChessPiece.Space
+                                        && this.WhiteCanCastleQueenside)
+                                    {
+                                        pieceMoves.Add(new ChessMove
+                                        {
+                                            Piece = ChessPiece.BlackKing,
+                                            StartSquare = "e8",
+                                            EndSquare = "c8",
+                                            QueensideCastle = true
+                                        });
+                                    }
+
+                                    if (this.chessBoard[8, 8] == ChessPiece.BlackRook
+                                        && this.chessBoard[7, 8] == ChessPiece.Space && this.chessBoard[6, 8] == ChessPiece.Space
+                                        && this.WhiteCanCastleKingside)
+                                    {
+                                        pieceMoves.Add(new ChessMove
+                                        {
+                                            Piece = ChessPiece.BlackKing,
+                                            StartSquare = "e8",
+                                            EndSquare = "g8",
+                                            KingsideCastle = true
+                                        });
+                                    }
+                                }
+                            }
                             break;
                     }
 
@@ -432,7 +641,64 @@ namespace Rmays.ChessEngine
                 }
             }
 
-            return moves;
+            // Jump out if we only want to return captures.
+            // This is used when determining if the king is in check.
+            if (onlyReturnCaptures)
+            {
+                return moves.Where(x => x.WasPieceCaptured).ToList();
+            }
+
+            // Reject moves that cause the current player's turn's king to be in check.
+            var rejectedMoves = new List<ChessMove>();
+            foreach (var move in moves)
+            {
+                ChessBoardState checkBoard = (ChessBoardState)this.Clone();
+                checkBoard.MakeMove(move);
+
+                if (checkBoard.IsOpponentInCheck())
+                {
+                    // Reject the move; the player is in check after making this move.
+                    rejectedMoves.Add(move);
+                }
+
+            }
+
+            moves = moves.Where(x => !rejectedMoves.Contains(x)).ToList();
+
+            return moves
+                .OrderBy(x => x.StartSquare[1])
+                .ThenBy(x => x.StartSquare[0])
+                .ThenBy(x => x.EndSquare[1])
+                .ThenBy(x => x.EndSquare[0])
+                .ThenBy(x => x.PawnPromotedTo.ToString())
+                .ToList();
+        }
+
+        private bool IsOpponentInCheck()
+        {
+            // Find the king.
+            var target = (SideToMove == ChessColor.White ? ChessPiece.BlackKing : ChessPiece.WhiteKing);
+            for (var r = 1; r <= 8; r++)
+            {
+                for (var f = 1; f <= 8; f++)
+                {
+                    if (this.chessBoard[f, r] != target)
+                    {
+                        continue;
+                    }
+
+                    var spot = new ChessBoardSquare(f, r);
+
+                    // Found the king at spot (f,r).
+                    // Call 'PossibleMoves', but only return the moves with a capture.
+                    // THEN, find any moves where the king Could be captured.
+                    var captureMoves = this.PossibleMoves(true).Where(x => x.EndSquare == spot.GetAN());
+                    return captureMoves.Any();
+                }
+            }
+
+            // Didn't find the king!  This is probably bad.
+            return false;
         }
 
         private List<ChessMove> GetSlideMoves(int f, int r, int deltaF, int deltaR, ChessPiece piece)
@@ -515,6 +781,24 @@ namespace Rmays.ChessEngine
 
             // We've checked all adjacent squares.  Return the moves we found.
             return moves;
+        }
+
+        public object Clone()
+        {
+            var newState = new ChessBoardState
+            {
+                BlackCanCastleKingside = this.BlackCanCastleKingside,
+                BlackCanCastleQueenside = this.BlackCanCastleQueenside,
+                WhiteCanCastleKingside = this.WhiteCanCastleKingside,
+                WhiteCanCastleQueenside = this.WhiteCanCastleQueenside,
+                EnPassantTargetSquare = this.EnPassantTargetSquare,
+                chessBoard = (ChessPiece[,])this.chessBoard.Clone(),
+                FullMoves = this.FullMoves,
+                HalfMoveClock = this.HalfMoveClock,
+                SideToMove = this.SideToMove
+            };
+
+            return newState;
         }
     }
 }

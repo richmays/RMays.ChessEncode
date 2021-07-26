@@ -120,7 +120,7 @@ namespace RMays.ChessEncode.Common
                 return;
             }
 
-            List<int> firstPrimes = new List<int> { 2, 3, 5 };
+            List<int> firstPrimes = new List<int> { 2 }; //, 3, 5 };
 
             // Reduce; if the numerator and denominator are divisible by the given prime, divide both.
             foreach (var prime in firstPrimes)
