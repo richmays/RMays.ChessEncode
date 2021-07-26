@@ -30,32 +30,32 @@ namespace Rmays.ChessEngine
         /// <summary>
         /// Was this a capturing move?
         /// </summary>
-        public bool WasPieceCaptured { get; set; }  = false;
+        public bool WasPieceCaptured { get; set; } = false;
 
         /// <summary>
         /// Was this a kingside castle?
         /// </summary>
-        public bool KingsideCastle { get; set; }  = false;
+        public bool KingsideCastle { get; set; } = false;
 
         /// <summary>
         /// Was this a queenside castle?
         /// </summary>
-        public bool QueensideCastle { get; set; }  = false;
+        public bool QueensideCastle { get; set; } = false;
 
         /// <summary>
         /// Does this move put the opposing king in check?
         /// </summary>
-        public bool IsCheckingMove { get; set; }  = false;
+        public bool IsCheckingMove { get; set; } = false;
 
         /// <summary>
         /// Does this move put the opposing king in checkmate?
         /// </summary>
-        public bool IsCheckmateMove { get; set; }  = false;
+        public bool IsCheckmateMove { get; set; } = false;
 
         /// <summary>
         /// If this was a pawn promotion move, what did the pawn get promoted to?
         /// </summary>
-        public PromotionChessPiece PawnPromotedTo { get; set; }  = PromotionChessPiece.None;
+        public PromotionChessPiece PawnPromotedTo { get; set; } = PromotionChessPiece.None;
 
         /// <summary>
         /// Return the move in Standard Algebraic Notation (SAN).
@@ -67,18 +67,22 @@ namespace Rmays.ChessEngine
 
             if (KingsideCastle)
             {
-                return "O-O";
+                return "O-O"
+                    + $"{(IsCheckingMove ? "+" : "")}"
+                    + $"{(IsCheckmateMove ? "#" : "")}";
             }
             else if (QueensideCastle)
             {
-                return "O-O-O";
+                return "O-O-O"
+                    + $"{(IsCheckingMove ? "+" : "")}"
+                    + $"{(IsCheckmateMove ? "#" : "")}";
             }
 
             var result = $"{GetPieceInitial(Piece)}"
                 + (showSourceSquare ?
                         $"{StartSquare}" +
                         $"{(WasPieceCaptured ? "x" : "-")}"
-                    : "" )
+                    : "")
                 + $"{EndSquare}"
                 + $"{(PawnPromotedTo == PromotionChessPiece.None ? "" : "=" + GetPromotionPieceInitial(PawnPromotedTo))}"
                 + $"{(IsCheckingMove ? "+" : "")}"
