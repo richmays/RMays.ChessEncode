@@ -63,6 +63,11 @@ namespace Rmays.ChessEngine
             this.FullMoves = orig.FullMoves;
         }
 
+        public ChessPiece GetSpot(int f, int r)
+        {
+            return this.chessBoard[f, r];
+        }
+
         public void SetSpot(int f, int r, ChessPiece piece)
         {
             this.chessBoard[f, r] = piece;
