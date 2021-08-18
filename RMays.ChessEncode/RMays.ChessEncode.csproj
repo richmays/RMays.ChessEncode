@@ -47,6 +47,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChessEncodeUI.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ChessEncodeUI.Designer.cs">
+      <DependentUpon>ChessEncodeUI.cs</DependentUpon>
+    </Compile>
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -55,6 +61,9 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="ChessEncodeUI.resx">
+      <DependentUpon>ChessEncodeUI.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
@@ -66,6 +75,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -85,6 +95,19 @@
       <Project>{7a09b437-7168-4378-9db4-b59bd7ca19c1}</Project>
       <Name>RMays.ChessEncode.Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Rmays.ChessEngine\Rmays.ChessEngine.csproj">
+      <Project>{bbfca5e7-a66d-4efa-ac0a-f2e0519edd09}</Project>
+      <Name>Rmays.ChessEngine</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\broken.png" />
+    <Content Include="resources\chesspieces-darkBG.png" />
+    <None Include="resources\chesspieces-whiteBG.bmp" />
+    <Content Include="resources\chesspieces-whiteBG.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\chessboard.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

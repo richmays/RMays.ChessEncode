@@ -24,3 +24,12 @@ THEREFORE: It's theoretically possible to convert any text (or binary data) into
 
 This program will attempt to do just that; it will accept any text, and will return a series of chess game in PGN format that encodes the text.
 It will also decode any decimal number into a chess game.  (You could see what the 'pi' chess game looks like, or 'e', or 'square root of 2', etc.)
+
+2021-08-09 M (but actually developed a couple weeks back)
+
+Finished the chess engine logic, other than checking for draws from insufficient material (King vs King, King vs Knight + King, King vs Bishop + King),
+and we aren't considering the 50-move or 75-move rules for draws.
+
+TODO: Display a WinForms chess board, import a game in PGN format, and show the pieces at any point in the game.
+Then, allow an import of any text string, and convert it into a series of PGN games that uniquely encode that string.
+Then, do the reverse; turn any collection of games into a text string.

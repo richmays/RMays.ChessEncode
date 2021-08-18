@@ -117,29 +117,4 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="chessboard" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\chessboard.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="chesspieces" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\chesspieces.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="wp" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\wp.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ChessPiecesTransparent" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\ChessPiecesTransparent.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ChessPieces2" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\ChessPieces2.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="chesspieces_darkBG" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\chesspieces-darkBG.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="chesspieces_whiteBG" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\chesspieces-whiteBG.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="broken" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\broken.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
 </root>
