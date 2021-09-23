@@ -48,6 +48,8 @@
             this.txtBoardHPadding = new System.Windows.Forms.NumericUpDown();
             this.txtBoardVPadding = new System.Windows.Forms.NumericUpDown();
             this.txtSquareSideLength = new System.Windows.Forms.NumericUpDown();
+            this.btnToggleBoardLayoutNumbers = new System.Windows.Forms.Button();
+            this.btnToggleMovePicker = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.txtImgLeftOffset)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtImgTopOffset)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtImgHPadding)).BeginInit();
@@ -62,7 +64,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(1064, 235);
+            this.label1.Location = new System.Drawing.Point(1530, 234);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(54, 20);
             this.label1.TabIndex = 0;
@@ -72,7 +74,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(1062, 277);
+            this.label2.Location = new System.Drawing.Point(1528, 276);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(82, 20);
             this.label2.TabIndex = 1;
@@ -82,7 +84,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(1064, 309);
+            this.label3.Location = new System.Drawing.Point(1530, 308);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(81, 20);
             this.label3.TabIndex = 2;
@@ -92,7 +94,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(1064, 119);
+            this.label4.Location = new System.Drawing.Point(1530, 118);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(151, 20);
             this.label4.TabIndex = 6;
@@ -102,7 +104,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(1062, 373);
+            this.label5.Location = new System.Drawing.Point(1528, 372);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(124, 20);
             this.label5.TabIndex = 8;
@@ -112,7 +114,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(1064, 341);
+            this.label6.Location = new System.Drawing.Point(1530, 340);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(143, 20);
             this.label6.TabIndex = 7;
@@ -122,7 +124,7 @@
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(1062, 598);
+            this.label7.Location = new System.Drawing.Point(1528, 597);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(124, 20);
             this.label7.TabIndex = 17;
@@ -132,7 +134,7 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(1064, 566);
+            this.label8.Location = new System.Drawing.Point(1530, 565);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(143, 20);
             this.label8.TabIndex = 16;
@@ -142,7 +144,7 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(1064, 534);
+            this.label9.Location = new System.Drawing.Point(1530, 533);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(81, 20);
             this.label9.TabIndex = 13;
@@ -152,7 +154,7 @@
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(1062, 502);
+            this.label10.Location = new System.Drawing.Point(1528, 501);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(82, 20);
             this.label10.TabIndex = 12;
@@ -162,7 +164,7 @@
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(1064, 460);
+            this.label11.Location = new System.Drawing.Point(1530, 459);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(52, 20);
             this.label11.TabIndex = 11;
@@ -171,7 +173,7 @@
             // 
             // txtImgLeftOffset
             // 
-            this.txtImgLeftOffset.Location = new System.Drawing.Point(1225, 275);
+            this.txtImgLeftOffset.Location = new System.Drawing.Point(1691, 274);
             this.txtImgLeftOffset.Maximum = new decimal(new int[] {
             1000,
             0,
@@ -195,7 +197,7 @@
             // 
             // txtImgTopOffset
             // 
-            this.txtImgTopOffset.Location = new System.Drawing.Point(1225, 307);
+            this.txtImgTopOffset.Location = new System.Drawing.Point(1691, 306);
             this.txtImgTopOffset.Maximum = new decimal(new int[] {
             1000,
             0,
@@ -219,7 +221,7 @@
             // 
             // txtImgHPadding
             // 
-            this.txtImgHPadding.Location = new System.Drawing.Point(1225, 339);
+            this.txtImgHPadding.Location = new System.Drawing.Point(1691, 338);
             this.txtImgHPadding.Maximum = new decimal(new int[] {
             1000,
             0,
@@ -243,7 +245,7 @@
             // 
             // txtImgVPadding
             // 
-            this.txtImgVPadding.Location = new System.Drawing.Point(1225, 371);
+            this.txtImgVPadding.Location = new System.Drawing.Point(1691, 370);
             this.txtImgVPadding.Maximum = new decimal(new int[] {
             1000,
             0,
@@ -267,7 +269,7 @@
             // 
             // txtBoardTopOffset
             // 
-            this.txtBoardTopOffset.Location = new System.Drawing.Point(1225, 532);
+            this.txtBoardTopOffset.Location = new System.Drawing.Point(1691, 531);
             this.txtBoardTopOffset.Maximum = new decimal(new int[] {
             1000,
             0,
@@ -291,7 +293,7 @@
             // 
             // txtBoardLeftOffset
             // 
-            this.txtBoardLeftOffset.Location = new System.Drawing.Point(1225, 500);
+            this.txtBoardLeftOffset.Location = new System.Drawing.Point(1691, 499);
             this.txtBoardLeftOffset.Maximum = new decimal(new int[] {
             1000,
             0,
@@ -315,7 +317,7 @@
             // 
             // txtBoardHPadding
             // 
-            this.txtBoardHPadding.Location = new System.Drawing.Point(1225, 564);
+            this.txtBoardHPadding.Location = new System.Drawing.Point(1691, 563);
             this.txtBoardHPadding.Maximum = new decimal(new int[] {
             1000,
             0,
@@ -333,7 +335,7 @@
             // 
             // txtBoardVPadding
             // 
-            this.txtBoardVPadding.Location = new System.Drawing.Point(1225, 596);
+            this.txtBoardVPadding.Location = new System.Drawing.Point(1691, 595);
             this.txtBoardVPadding.Maximum = new decimal(new int[] {
             1000,
             0,
@@ -351,7 +353,7 @@
             // 
             // txtSquareSideLength
             // 
-            this.txtSquareSideLength.Location = new System.Drawing.Point(1225, 117);
+            this.txtSquareSideLength.Location = new System.Drawing.Point(1691, 116);
             this.txtSquareSideLength.Maximum = new decimal(new int[] {
             1000,
             0,
@@ -373,11 +375,33 @@
             this.txtSquareSideLength.Visible = false;
             this.txtSquareSideLength.ValueChanged += new System.EventHandler(this.txtSquareSideLength_ValueChanged);
             // 
+            // btnToggleBoardLayoutNumbers
+            // 
+            this.btnToggleBoardLayoutNumbers.Location = new System.Drawing.Point(1516, 12);
+            this.btnToggleBoardLayoutNumbers.Name = "btnToggleBoardLayoutNumbers";
+            this.btnToggleBoardLayoutNumbers.Size = new System.Drawing.Size(259, 41);
+            this.btnToggleBoardLayoutNumbers.TabIndex = 45;
+            this.btnToggleBoardLayoutNumbers.Text = "Toggle Board Layout Numbers";
+            this.btnToggleBoardLayoutNumbers.UseVisualStyleBackColor = true;
+            this.btnToggleBoardLayoutNumbers.Click += new System.EventHandler(this.btnToggleBoardLayoutNumbers_Click);
+            // 
+            // btnToggleMovePicker
+            // 
+            this.btnToggleMovePicker.Location = new System.Drawing.Point(1516, 74);
+            this.btnToggleMovePicker.Name = "btnToggleMovePicker";
+            this.btnToggleMovePicker.Size = new System.Drawing.Size(259, 41);
+            this.btnToggleMovePicker.TabIndex = 46;
+            this.btnToggleMovePicker.Text = "Toggle Move Picker";
+            this.btnToggleMovePicker.UseVisualStyleBackColor = true;
+            this.btnToggleMovePicker.Click += new System.EventHandler(this.btnToggleMovePicker_Click);
+            // 
             // ChessEncodeUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1501, 933);
+            this.ClientSize = new System.Drawing.Size(1904, 1252);
+            this.Controls.Add(this.btnToggleMovePicker);
+            this.Controls.Add(this.btnToggleBoardLayoutNumbers);
             this.Controls.Add(this.txtSquareSideLength);
             this.Controls.Add(this.txtBoardVPadding);
             this.Controls.Add(this.txtBoardHPadding);
@@ -437,5 +461,7 @@
         private System.Windows.Forms.NumericUpDown txtBoardHPadding;
         private System.Windows.Forms.NumericUpDown txtBoardVPadding;
         private System.Windows.Forms.NumericUpDown txtSquareSideLength;
+        private System.Windows.Forms.Button btnToggleBoardLayoutNumbers;
+        private System.Windows.Forms.Button btnToggleMovePicker;
     }
 }
