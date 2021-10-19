@@ -305,6 +305,55 @@ WR WN WB WQ WK WB WN WR".Trim(), board.ToString().Trim());
         }
 
         [TestMethod]
+        public void GetMoves_BlackKing_CanCastleQueenside()
+        {
+            var board = new ChessBoardState();
+            board.Clear();
+            board.SetSpot(5, 1, ChessPiece.WhiteRook);
+            board.SetSpot(6, 1, ChessPiece.WhiteRook);
+            board.SetSpot(7, 1, ChessPiece.WhiteKing);
+
+            board.SetSpot(1, 2, ChessPiece.WhitePawn);
+            board.SetSpot(3, 2, ChessPiece.WhiteBishop);
+            board.SetSpot(5, 2, ChessPiece.WhiteQueen);
+            board.SetSpot(7, 2, ChessPiece.WhitePawn);
+
+            board.SetSpot(3, 3, ChessPiece.WhitePawn);
+            board.SetSpot(7, 3, ChessPiece.WhitePawn);
+            board.SetSpot(8, 3, ChessPiece.WhitePawn);
+
+            board.SetSpot(2, 4, ChessPiece.WhitePawn);
+            board.SetSpot(6, 4, ChessPiece.WhiteBishop);
+
+            board.SetSpot(2, 5, ChessPiece.BlackPawn);
+            board.SetSpot(3, 5, ChessPiece.WhitePawn);
+            board.SetSpot(4, 5, ChessPiece.BlackPawn);
+            board.SetSpot(5, 5, ChessPiece.BlackKnight);
+            board.SetSpot(8, 5, ChessPiece.BlackPawn);
+
+            board.SetSpot(1, 6, ChessPiece.BlackPawn);
+            board.SetSpot(5, 6, ChessPiece.BlackPawn);
+            board.SetSpot(6, 6, ChessPiece.BlackPawn);
+
+            board.SetSpot(4, 7, ChessPiece.BlackBishop);
+            board.SetSpot(7, 7, ChessPiece.BlackQueen);
+
+            board.SetSpot(1, 8, ChessPiece.BlackRook);
+            board.SetSpot(5, 8, ChessPiece.BlackKing);
+            board.SetSpot(8, 8, ChessPiece.BlackRook);
+
+            board.SetWhiteCanCastleKingside(false);
+            board.SetWhiteCanCastleQueenside(false);
+            board.SetBlackCanCastleKingside(true);
+            board.SetBlackCanCastleQueenside(true);
+            board.SetSideToMove(ChessColor.Black);
+
+            var moves = board.PossibleMoves();
+            Assert.AreEqual(1, moves.Count(x => x.QueensideCastle), "Black should be allowed to castle queenside.");
+            Assert.AreEqual(1, moves.Count(x => x.KingsideCastle), "Black should be allowed to castle kingside.");
+        }
+
+        [TestMethod]
         public void GetMoves_WhiteKing_CantCastleWhileInCheck()
         {
             var board = new ChessBoardState();
@@ -656,6 +705,77 @@ WR WN WB WQ WK WB WN WR".Trim(), board.ToString().Trim());
             };
 
             CheckPossibleMoves(board, expectedMoves);
+        }
+
+        [TestMethod]
+        public void GetMoves_BlackPawn_EnPassant()
+        {
+            /*
+{-- -- -- -- -- -- -- --
+ -- -- -- -- -- -- -- --
+ -- BP -- -- BK -- -- --
+ BP WP -- -- -- -- -- --
+ -- -- -- -- -- WK -- BP
+ -- -- WP -- -- WN -- WP
+ -- -- -- -- -- -- WP --
+ -- -- -- -- -- -- -- --
+ }
+             * */
+            var board = new ChessBoardState();
+            board.Clear();
+            board.SetBlackCanCastleKingside(false);
+            board.SetBlackCanCastleQueenside(false);
+            board.SetWhiteCanCastleKingside(false);
+            board.SetWhiteCanCastleQueenside(false);
+            board.SetSideToMove(ChessColor.Black);
+
+            board.SetSpot(7, 2, ChessPiece.WhitePawn);
+
+            board.SetSpot(3, 3, ChessPiece.WhitePawn);
+            board.SetSpot(6, 3, ChessPiece.WhiteKnight);
+            board.SetSpot(8, 3, ChessPiece.WhitePawn);
+
+            board.SetSpot(6, 4, ChessPiece.WhiteKing);
+            board.SetSpot(8, 4, ChessPiece.BlackPawn);
+
+            //board.SetSpot(1, 5, ChessPiece.BlackPawn);
+            board.SetSpot(2, 5, ChessPiece.WhitePawn);
+
+            board.SetSpot(2, 6, ChessPiece.BlackPawn);
+            board.SetSpot(5, 6, ChessPiece.BlackKing);
+
+            // for en passant
+            board.SetSpot(1, 7, ChessPiece.BlackPawn);
+
+            var moveBlackPushPawn = new ChessMove
+            {
+                Piece = ChessPiece.BlackPawn,
+                StartSquare = "a7",
+                EndSquare = "a5"
+            };
+
+            Assert.AreEqual("", board.GetEnPassantTargetSquare(), $"En passant target square should be blank, but it was [{board.GetEnPassantTargetSquare()}].");
+            Assert.IsTrue(board.TryMakeMove(moveBlackPushPawn), "Prerequisite failed; we couldn't push the A pawn.");
+            Assert.AreEqual("a6", board.GetEnPassantTargetSquare(), $"En passant target square should be a6, but it was [{board.GetEnPassantTargetSquare()}].");
+
+            var possibleMoves = board.PossibleMoves();
+
+            // Verify that white can capture the pawn en passant.
+            Assert.IsTrue(board.PossibleMoves().Select(x => x.ToString()).Contains("Pb5xa6"));
+
+            var moveWhiteCapEnPassant = new ChessMove
+            {
+                Piece = ChessPiece.WhitePawn,
+                StartSquare = "b5",
+                EndSquare = "a6",
+                WasPieceCaptured = true
+            };
+
+            Assert.IsTrue(board.TryMakeMove(moveWhiteCapEnPassant), "Failed to capture en passant.");
+            Assert.AreEqual("", board.GetEnPassantTargetSquare(), $"After capturing en passant, the en passant target square should be blank, but it was [{board.GetEnPassantTargetSquare()}].");
+
+            // NOW, there should NOT be a black pawn on A5; it was captured in teh previous move.
+            Assert.IsTrue(board.GetSpot(1, 5) == ChessPiece.Space, $"The spot 'a5' should be empty (it was a black pawn captured by a white pawn en passant), but it has: {board.GetSpot(1, 5)}.");
         }
 
         [TestMethod]
