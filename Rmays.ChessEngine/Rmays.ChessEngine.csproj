@@ -47,6 +47,7 @@
     <Compile Include="ChessMove.cs" />
     <Compile Include="ChessPiece.cs" />
     <Compile Include="ChessColor.cs" />
+    <Compile Include="GameState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

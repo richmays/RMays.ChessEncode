@@ -108,6 +108,11 @@ namespace Rmays.ChessEngine
             this.EnPassantTargetSquare = ChessBoardSquare.GetAN(file, rank);
         }
 
+        public string GetEnPassantTargetSquare()
+        {
+            return this.EnPassantTargetSquare;
+        }
+
         /// <summary>
         /// Remove all pieces from the board, and set the board's state to the default values.
         /// </summary>
@@ -136,7 +141,7 @@ namespace Rmays.ChessEngine
             this.WhiteCanCastleQueenside = false;
             this.BlackCanCastleKingside = false;
             this.BlackCanCastleQueenside = false;
-            EnPassantTargetSquare = null;
+            EnPassantTargetSquare = "";
             HalfMoveClock = 0;
             FullMoves = 1;
         }
@@ -334,6 +339,11 @@ namespace Rmays.ChessEngine
 
         public bool TryMakeMove(ChessMove move)
         {
+            // //this.EnPassantTargetSquare = ChessBoardSquare.GetAN(f, r + deltaRank);
+            // Reset en passant target square.
+            var OldEnPassantTargetSquare = this.EnPassantTargetSquare;
+            EnPassantTargetSquare = "";
+
             if (move.Piece != GetChessPieceFromAN(move.StartSquare))
             {
                 // Invalid move; the move's piece doesn't match the move's start square.
@@ -432,10 +442,34 @@ namespace Rmays.ChessEngine
             }
             else
             {
+                // Set the passant flag.
+                if (move.Piece == ChessPiece.WhitePawn && move.StartSquare[1] == '2' && move.EndSquare[1] == '4')
+                {
+                    this.EnPassantTargetSquare = $"{move.StartSquare[0]}3";
+                }
+                else if (move.Piece == ChessPiece.BlackPawn && move.StartSquare[1] == '7' && move.EndSquare[1] == '5')
+                {
+                    this.EnPassantTargetSquare = $"{move.StartSquare[0]}6";
+                }
+
+                // Clear the piece's start square.
                 this.chessBoard[move.StartSquare[0] - 'a' + 1, move.StartSquare[1] - '0'] = ChessPiece.Space;
                 if (move.PawnPromotedTo == PromotionChessPiece.None)
                 {
                     this.chessBoard[move.EndSquare[0] - 'a' + 1, move.EndSquare[1] - '0'] = move.Piece;
+
+                    // Check if a pawn captured en passant; if so, clear the pawn that was captured.
+                    if (move.EndSquare == OldEnPassantTargetSquare && move.WasPieceCaptured)
+                    {
+                        if (move.Piece == ChessPiece.WhitePawn)
+                        {
+                            this.chessBoard[OldEnPassantTargetSquare[0] - 'a' + 1, 5] = ChessPiece.Space;
+                        }
+                        else if (move.Piece == ChessPiece.BlackPawn)
+                        {
+                            this.chessBoard[OldEnPassantTargetSquare[0] - 'a' + 1, 4] = ChessPiece.Space;
+                        }
+                    }
                 }
                 else
                 {
@@ -600,6 +634,7 @@ namespace Rmays.ChessEngine
                                             StartSquare = ChessBoardSquare.GetAN(f, r),
                                             EndSquare = ChessBoardSquare.GetAN(f, r + deltaRank + deltaRank)
                                         });
+                                        //this.EnPassantTargetSquare = ChessBoardSquare.GetAN(f, r + deltaRank);
                                     }
                                 }
 
@@ -723,7 +758,7 @@ namespace Rmays.ChessEngine
                                 {
                                     if (this.chessBoard[1, 8] == ChessPiece.BlackRook
                                         && this.chessBoard[2, 8] == ChessPiece.Space && this.chessBoard[3, 8] == ChessPiece.Space && this.chessBoard[4, 8] == ChessPiece.Space
-                                        && this.WhiteCanCastleQueenside)
+                                        && this.BlackCanCastleQueenside)
                                     {
                                         pieceMoves.Add(new ChessMove
                                         {
@@ -736,7 +771,7 @@ namespace Rmays.ChessEngine
 
                                     if (this.chessBoard[8, 8] == ChessPiece.BlackRook
                                         && this.chessBoard[7, 8] == ChessPiece.Space && this.chessBoard[6, 8] == ChessPiece.Space
-                                        && this.WhiteCanCastleKingside)
+                                        && this.BlackCanCastleKingside)
                                     {
                                         pieceMoves.Add(new ChessMove
                                         {
