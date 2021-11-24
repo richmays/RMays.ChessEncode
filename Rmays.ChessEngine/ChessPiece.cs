@@ -25,6 +25,11 @@ namespace Rmays.ChessEngine
         WhiteQueen = 5,
         WhiteKing = 6,
 
+        BlackDarkBishop = -13,
+        BlackLightBishop = -23,
+        WhiteDarkBishop = 13,
+        WhiteLightBishop = 23,
+
         /// <summary>
         /// This position is outside of the board; no piece can move here.
         /// </summary>

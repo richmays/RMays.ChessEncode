@@ -1043,6 +1043,95 @@ WR WN WB WQ WK WB WN WR".Trim(), board.ToString().Trim());
             Assert.AreEqual(1, gameResult, $"The game should be a White win, but it's not.  Expected result of 1 (White wins), but result was {gameResult}.");
         }
 
+        [TestMethod]
+        public void GetMoves_InsufficientMaterial_TwoKings()
+        {
+            var board = new ChessBoardState();
+            board.Clear();
+            board.SetSideToMove(ChessColor.White);
+            board.SetSpot(5, 1, ChessPiece.WhiteKing);
+            board.SetSpot(5, 8, ChessPiece.BlackKing);
+
+            var expectedMoves = new List<string>
+            {
+            };
+
+            CheckPossibleMoves(board, expectedMoves);
+
+            // Game should be over due to insufficient material.
+            var isGameOver = board.IsGameOver(out var gameResult);
+            Assert.IsTrue(isGameOver);
+            Assert.AreEqual(0, gameResult);
+        }
+
+        [TestMethod]
+        public void GetMoves_InsufficientMaterial_K_vs_KN()
+        {
+            var board = new ChessBoardState();
+            board.Clear();
+            board.SetSideToMove(ChessColor.White);
+            board.SetSpot(5, 1, ChessPiece.WhiteKing);
+            board.SetSpot(2, 1, ChessPiece.WhiteKnight);
+            board.SetSpot(5, 8, ChessPiece.BlackKing);
+
+            var expectedMoves = new List<string>
+            {
+            };
+
+            CheckPossibleMoves(board, expectedMoves);
+
+            // Game should be over due to insufficient material.
+            var isGameOver = board.IsGameOver(out var gameResult);
+            Assert.IsTrue(isGameOver);
+            Assert.AreEqual(0, gameResult);
+        }
+
+        [TestMethod]
+        public void GetMoves_InsufficientMaterial_K_vs_KB()
+        {
+            var board = new ChessBoardState();
+            board.Clear();
+            board.SetSideToMove(ChessColor.White);
+            board.SetSpot(5, 1, ChessPiece.WhiteKing);
+            board.SetSpot(3, 1, ChessPiece.WhiteBishop);
+            board.SetSpot(5, 8, ChessPiece.BlackKing);
+
+            var expectedMoves = new List<string>
+            {
+            };
+
+            CheckPossibleMoves(board, expectedMoves);
+
+            // Game should be over due to insufficient material.
+            var isGameOver = board.IsGameOver(out var gameResult);
+            Assert.IsTrue(isGameOver);
+            Assert.AreEqual(0, gameResult);
+        }
+
+        [TestMethod]
+        public void GetMoves_InsufficientMaterial_KB_vs_KB()
+        {
+            var board = new ChessBoardState();
+            board.Clear();
+            board.SetSideToMove(ChessColor.White);
+            board.SetSpot(5, 1, ChessPiece.WhiteKing);
+            board.SetSpot(3, 1, ChessPiece.WhiteBishop);
+            board.SetSpot(5, 8, ChessPiece.BlackKing);
+            board.SetSpot(3, 8, ChessPiece.BlackBishop);
+
+            var expectedMoves = new List<string>
+            {
+            };
+
+            CheckPossibleMoves(board, expectedMoves);
+
+            // Game should be over due to insufficient material.
+            // Bishops are on opposite-colored squares.
+            var isGameOver = board.IsGameOver(out var gameResult);
+            Assert.IsTrue(isGameOver);
+            Assert.AreEqual(0, gameResult);
+        }
+
         private void PrintBoardState(ChessBoardState board)
         {
             Console.WriteLine("******************************************");

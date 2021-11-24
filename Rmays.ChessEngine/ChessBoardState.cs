@@ -522,6 +522,68 @@ namespace Rmays.ChessEngine
         }
 
         /// <summary>
+        /// Given a dictionary of pieces and frequencies of pieces on the board,
+        /// return True if there's insufficient material for a checkmate to occur.
+        /// Return true if:
+        /// - K vs K
+        /// - KB vs K
+        /// - KN vs K
+        /// </summary>
+        /// <param name="pieceFrequencies"></param>
+        /// <returns></returns>
+        private bool IsInsufficientMaterial(Dictionary<ChessPiece, int> pieceFrequencies)
+        {
+            // Turn the dictionary of chess frequencies into a string that can be more easily compared.
+            var whitePieces = $"{pieceFrequencies[ChessPiece.WhiteKing]}{pieceFrequencies[ChessPiece.WhiteQueen]}" +
+                $"{pieceFrequencies[ChessPiece.WhiteRook]}{pieceFrequencies[ChessPiece.WhiteBishop]}" +
+                $"{pieceFrequencies[ChessPiece.WhiteKnight]}{pieceFrequencies[ChessPiece.WhitePawn]}";
+            var blackPieces = $"{pieceFrequencies[ChessPiece.BlackKing]}{pieceFrequencies[ChessPiece.BlackQueen]}" +
+                $"{pieceFrequencies[ChessPiece.BlackRook]}{pieceFrequencies[ChessPiece.BlackBishop]}" +
+                $"{pieceFrequencies[ChessPiece.BlackKnight]}{pieceFrequencies[ChessPiece.BlackPawn]}";
+
+            // King vs King
+            if (whitePieces == "100000" && blackPieces == "100000")
+            {
+                return true;
+            }
+
+            // King Bishop vs King
+            if (whitePieces == "100100" && blackPieces == "100000")
+            {
+                return true;
+            }
+            if (whitePieces == "100000" && blackPieces == "100100")
+            {
+                return true;
+            }
+
+            // King Knight vs King
+            if (whitePieces == "100010" && blackPieces == "100000")
+            {
+                return true;
+            }
+            if (whitePieces == "100000" && blackPieces == "100010")
+            {
+                return true;
+            }
+
+            // King Bishop vs King Bishop, opposite colors
+            if (whitePieces == "100100" && blackPieces == "100100")
+            {
+                if (pieceFrequencies[ChessPiece.BlackLightBishop] == 1 && pieceFrequencies[ChessPiece.WhiteDarkBishop] == 1)
+                {
+                    return true;
+                }
+                if (pieceFrequencies[ChessPiece.BlackDarkBishop] == 1 && pieceFrequencies[ChessPiece.WhiteLightBishop] == 1)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Returns an ordered list of chess moves from the given position.
         /// For each square (starting with a1, going to a8, then b1 to b8, etc), if a piece on that square is movable by the player,
         /// find all moves that piece can make (destination square starting with a1 to a8, then b1 to b8, etc).
@@ -529,6 +591,14 @@ namespace Rmays.ChessEngine
         /// <returns></returns>
         public List<ChessMove> PossibleMoves(bool onlyReturnCaptures = false)
         {
+            // Each time we find a piece on the board, add it to the dictionary.
+            // Used later to determine 'draw by insufficient material'.
+            var pieceFrequencies = new Dictionary<ChessPiece, int>();
+            foreach (ChessPiece p in Enum.GetValues(typeof(ChessPiece)))
+            {
+                pieceFrequencies.Add(p, 0);
+            }
+
             var moves = new List<ChessMove>();
             for (var r = 1; r <= 8; r++)
             {
@@ -536,6 +606,37 @@ namespace Rmays.ChessEngine
                 {
                     var pieceMoves = new List<ChessMove>();
                     var spot = this.chessBoard[f, r];
+
+                    if (spot != ChessPiece.Space && spot != ChessPiece.OutsideBoardRange)
+                    {
+                        pieceFrequencies[spot]++;
+
+                        // This mess is for detecting insufficient material for KB vs KB.
+                        // If there's a better way to do this, this whole block could be eliminated.
+                        if (spot == ChessPiece.WhiteBishop)
+                        {
+                            if ((r + f) % 2 == 0)
+                            {
+                                pieceFrequencies[ChessPiece.WhiteDarkBishop]++;
+                            }
+                            else
+                            {
+                                pieceFrequencies[ChessPiece.WhiteLightBishop]++;
+                            }
+                        }
+                        else if (spot == ChessPiece.BlackBishop)
+                        {
+                            if ((r + f) % 2 == 0)
+                            {
+                                pieceFrequencies[ChessPiece.BlackDarkBishop]++;
+                            }
+                            else
+                            {
+                                pieceFrequencies[ChessPiece.BlackLightBishop]++;
+                            }
+                        }
+                    }
+
                     if (spot == ChessPiece.Space) continue;
                     if ((int)spot * (int)this.SideToMove < 0) continue;
                     switch (Math.Abs((int)spot))
@@ -788,6 +889,15 @@ namespace Rmays.ChessEngine
 
                     moves.AddRange(pieceMoves.OrderBy(x => x.EndSquare).ThenBy(x => x.PawnPromotedTo.ToString()));
                 }
+            }
+
+            // Check for insufficient material.
+            if (IsInsufficientMaterial(pieceFrequencies))
+            {
+                // Insufficient material; there's no legal moves, and the game is over.
+                // Jump out with no possible moves.
+                moves.Clear();
+                return moves;
             }
 
             // Jump out if we only want to return captures.
