@@ -80,6 +80,8 @@ namespace RMays.ChessEncode
 
         private void PrintBoard()
         {
+            // I don't know why, but this method doesn't work anymore.  Hmm.
+            // It only shows the first move.
             this.SuspendLayout();
             for (int r = 1; r <= 8; r++)
             {
@@ -95,14 +97,18 @@ namespace RMays.ChessEncode
                     {
                         squares[f - 1, r - 1] = newPiece;
                     }
-                    else if (currSquare.Tag != newPiece.Tag)
+                    else if (currSquare.Tag.ToString() != newPiece.Tag.ToString())
                     {
                         squares[f - 1, r - 1].Dispose();
                         squares[f - 1, r - 1] = newPiece;
                     }
                 }
             }
+            //this.Invalidate();
+            //this.Update();
+            //Application.DoEvents();
             this.ResumeLayout();
+            this.Invalidate();
         }
 
         private void PrintBoard_old()

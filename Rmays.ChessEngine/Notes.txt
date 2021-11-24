@@ -3,7 +3,7 @@
 Purpose: Encode any text or binary data into a chess game (or games), AND decode any chess game into text / binary.
 Assumptions: The chess game is in PGN format (list of moves in Standard Algebraic Notation, and some header information about the game itself).
 
-Background: ANY text or binary data can be turned into a large number; the logarithm of the number is proportional to the length of the message.
+Background: ANY text or binary data can be turned into a large number; [the logarithm of the number is proportional to the length of the message.]  <-- Not true; the length of the message is proportional to the number itself, not its logarithm.
 To do this, we can convert the data into one big number.  (Q: Should we convert to base-64 as an intermediate step?  We probably don't need to.)
 (For example, if the plaintext is 'AA', this is (65*256) + 65, or 16,705.)
 
@@ -29,7 +29,15 @@ It will also decode any decimal number into a chess game.  (You could see what t
 
 Finished the chess engine logic, other than checking for draws from insufficient material (King vs King, King vs Knight + King, King vs Bishop + King),
 and we aren't considering the 50-move or 75-move rules for draws.
+Let's fix this!  Let's declare draws from insufficient material.
 
 TODO: Display a WinForms chess board, import a game in PGN format, and show the pieces at any point in the game.
 Then, allow an import of any text string, and convert it into a series of PGN games that uniquely encode that string.
 Then, do the reverse; turn any collection of games into a text string.
+
+^ UPDATE: This is too difficult.  Don't bother.
+
+Focus on the MVP, and ONLY the MVP:
+- Plaintext -> PGN-format chess game
+- PGN-format chess game -> plaintext
+
