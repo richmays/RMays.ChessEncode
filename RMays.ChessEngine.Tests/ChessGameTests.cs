@@ -40,7 +40,7 @@ namespace RMays.ChessEngine.Tests
             game.LoadPGN(gameCheckmateWhite);
             var move0 = game.GetMove(0);
             Assert.AreEqual("Ng1-f3", move0.ToString());
-            Assert.AreEqual("Nf3", move0.ToSAN());
+            Assert.AreEqual("Nf3", move0.SanString);
         }
 
         [TestMethod]
@@ -79,6 +79,37 @@ namespace RMays.ChessEngine.Tests
             var game = new ChessGame();
             game.LoadPGN(gameStalemate);
         }
+
+        [TestMethod]
+        public void PrintGame()
+        {
+            // TODO: Figure out what the PGN should be, and check the result.
+            var game = new ChessGame();
+            game.LoadPGN(gameCheckmateWhite);
+            //game.LoadPGN(gameCheckmateBlack);
+            //game.LoadPGN(gameTimeoutForfeit);
+            Console.WriteLine("Original PGN:");
+            Console.WriteLine(game.GetPGNWithoutComments());
+            Console.WriteLine("Smart PGN:");
+            Console.WriteLine(game.GetPGN());
+        }
+
+        [TestMethod]
+        public void OnlyFirstMoves()
+        {
+            var game = new ChessGame();
+            for (int i = 0; i < 20; i++)
+            {
+                game.MakeMove(i);
+            }
+
+            // Print the board after making 20 move 0s.
+            game.PrintBoard();
+
+            // Get the PGN.
+            Console.WriteLine("{" + game.GetPGN() + "}");
+        }
+
 
         #region PGN Games
 

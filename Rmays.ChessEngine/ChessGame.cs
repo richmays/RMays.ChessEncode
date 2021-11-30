@@ -49,6 +49,14 @@ namespace Rmays.ChessEngine
             pgnValues = new Dictionary<string, string>();
         }
 
+        public void MakeMove(int moveId)
+        {
+            var possibleMoves = this.PossibleMoves();
+            var result = possibleMoves[moveId % possibleMoves.Count()];
+            this.boardState.TryMakeMove(result);
+            this.moves.Add(result);
+        }
+
         public void LoadPGN(string pgn)
         {
             foreach(var line in pgn.Split('\r').Select(x => x.Trim()).Where(x => x!=string.Empty))
@@ -87,7 +95,7 @@ namespace Rmays.ChessEngine
                             // Move ID.  Don't process this.
                             continue;
                         }
-                        Console.WriteLine($"Processing move: [{moveToken}]...");
+                        //Console.WriteLine($"Processing move: [{moveToken}]...");
 
                         // Probably looks like ' Nf3 d5 2' or ' Nf3 d5' or ' Nf3'
                         //var halfMoves = fullMove.Split(' ').Where(x => x.Trim().Length > 0).ToList();
@@ -109,7 +117,7 @@ namespace Rmays.ChessEngine
                             }
                         }
 
-                        Console.WriteLine($"Done processing move: {moveToken}.");
+                        //Console.WriteLine($"Done processing move: {moveToken}.");
                     }
                 }
             }
@@ -118,6 +126,21 @@ namespace Rmays.ChessEngine
         public string GetPGNWithoutComments()
         {
             return this.pgnWithoutComments;
+        }
+
+        public string GetPGN()
+        {
+            var result = "";
+            for (int i = 0; i < moves.Count(); i++)
+            {
+                if (i % 2 == 0)
+                {
+                    result += $"{i / 2 + 1}. ";
+                }
+                result += $"{moves[i].SanString} ";
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -179,13 +202,6 @@ namespace Rmays.ChessEngine
         private ChessMove GetAndPlayMoveFromSAN(ChessBoardState board, ChessColor color, string moveStr)
         {
             var origMoveStr = moveStr;
-
-
-            if (origMoveStr == "Ka5")
-            {
-                var x = "asdfasf";
-
-            }
 
             // Check for the end-of-game.
             if (moveStr == "1-0")
@@ -307,13 +323,109 @@ namespace Rmays.ChessEngine
                 //Console.WriteLine($"Remaining: {moveStr}");
             }
 
+            move.SanString = ComputeSanString(board, move);
+
             if (!board.TryMakeMove(move))
             {
                 throw new ApplicationException($"Tried to make a move, but failed.  Move: {move}");
             }
 
-            move.SanString = origMoveStr;
+            move.OriginalSanString = origMoveStr;
             return move;
+        }
+
+        /// <summary>
+        /// Using the current board state, encode the given move into a SAN string.
+        /// </summary>
+        /// <param name="move"></param>
+        /// <returns></returns>
+        private string ComputeSanString(ChessBoardState board, ChessMove move)
+        {
+            // To remove ambiguity, we have to see if we need the starting rank and/or file.
+            if (move.KingsideCastle)
+            {
+                return $"O-O{(move.IsCheckmateMove?"#":move.IsCheckingMove?"+":"")}";
+            }
+            else if (move.QueensideCastle)
+            {
+                return $"O-O-O{(move.IsCheckmateMove?"#":move.IsCheckingMove?"+":"")}";
+            }
+            else if (move.PawnPromotedTo != PromotionChessPiece.None)
+            {
+                return $"{move.EndSquare}={move.GetPromotionPieceInitial(move.PawnPromotedTo).ToString().ToUpper()}{(move.IsCheckmateMove?"#":move.IsCheckingMove?"+":"")}";
+            }
+
+            // NOW, let's find all moves we Could make with this board,
+            // and find the move that ENDS with the last 2 chars of moveStr,
+            // and the piece moved is the given piece.
+            // If there's multiple pieces that could make that move, look at the first character of the moveStr for a clue.
+            var endSquare = move.EndSquare;
+            var possibleMoves = board.PossibleMoves().Where(x => x.EndSquare == endSquare && x.Piece == move.Piece && (x.PawnPromotedTo == PromotionChessPiece.None || x.PawnPromotedTo == move.PawnPromotedTo));
+
+            if (possibleMoves.Count() == 1)
+            {
+                // We found exactly one match.  Perfect; let's grab the details we didn't have yet.
+                if (move.Piece == ChessPiece.BlackPawn || move.Piece == ChessPiece.WhitePawn)
+                {
+                    if (move.WasPieceCaptured)
+                    {
+                        return $"{move.StartSquare[0]}x{move.EndSquare}{(move.IsCheckmateMove ? "#" : move.IsCheckingMove ? "+" : "")}";
+                    }
+                    else
+                    {
+                        return $"{move.EndSquare}{(move.IsCheckmateMove ? "#" : move.IsCheckingMove ? "+" : "")}";
+                    }
+                }
+                else
+                {
+                    return $"{move.GetPieceInitial(move.Piece)}{(move.WasPieceCaptured ? "x" : "")}{move.EndSquare}{(move.IsCheckmateMove ? "#" : move.IsCheckingMove ? "+" : "")}";
+                }
+            }
+            else if (possibleMoves.Count() > 1)
+            {
+                // What do we do?
+                // First, compare the starting File (the letter).
+                var subPossibilities = possibleMoves.Where(x => x.StartSquare[0] == move.StartSquare[0]);
+                if (subPossibilities.Count() == 1)
+                {
+                    if (move.Piece == ChessPiece.BlackPawn || move.Piece == ChessPiece.WhitePawn)
+                    {
+                        return $"{move.StartSquare[0]}{(move.WasPieceCaptured ? "x" : "")}{move.EndSquare}{(move.IsCheckmateMove ? "#" : move.IsCheckingMove ? "+" : "")}";
+                    }
+                    else
+                    {
+                        return $"{move.GetPieceInitial(move.Piece)}{move.StartSquare[0]}{(move.WasPieceCaptured ? "x" : "")}{move.EndSquare}{(move.IsCheckmateMove ? "#" : move.IsCheckingMove ? "+" : "")}";
+                    }
+                }
+
+                // Oh no, the starting rank isn't enough to tell them apart.
+                // Compare the starting Rank (the number).
+                subPossibilities = possibleMoves.Where(x => x.StartSquare[1] == move.StartSquare[1]);
+                if (subPossibilities.Count() == 1)
+                {
+                    if (move.Piece == ChessPiece.BlackPawn || move.Piece == ChessPiece.WhitePawn)
+                    {
+                        return $"{move.StartSquare[1]}{(move.WasPieceCaptured ? "x" : "")}{move.EndSquare}{(move.IsCheckmateMove ? "#" : move.IsCheckingMove ? "+" : "")}";
+                    }
+                    else
+                    {
+                        return $"{move.GetPieceInitial(move.Piece)}{move.StartSquare[1]}{(move.WasPieceCaptured ? "x" : "")}{move.EndSquare}{(move.IsCheckmateMove ? "#" : move.IsCheckingMove ? "+" : "")}";
+                    }
+                }
+
+                // Not good enough; need to use the entire start square now.
+                if (move.Piece == ChessPiece.BlackPawn || move.Piece == ChessPiece.WhitePawn)
+                {
+                    return $"{move.StartSquare}{(move.WasPieceCaptured ? "x" : "")}{move.EndSquare}{(move.IsCheckmateMove ? "#" : move.IsCheckingMove ? "+" : "")}";
+                }
+                else
+                {
+                    return $"{move.GetPieceInitial(move.Piece)}{move.StartSquare}{(move.WasPieceCaptured ? "x" : "")}{move.EndSquare}{(move.IsCheckmateMove ? "#" : move.IsCheckingMove ? "+" : "")}";
+                }
+            }
+
+            // We should never get here.
+            return "";
         }
 
         private ChessPiece GetPieceByInitial(ChessColor color, char firstInitial)
@@ -336,7 +448,6 @@ namespace Rmays.ChessEngine
                     throw new ApplicationException($"Invalid piece intial: {firstInitial}.");
             }
         }
-
 
         private PromotionChessPiece GetPromotionPieceByInitial(char firstInitial)
         {
