@@ -54,9 +54,15 @@ namespace Rmays.ChessEngine
 
         /// <summary>
         /// The SAN string of the move (as it appears in a chess game transcript; eg. 'e4' or 'Ne5')
+        /// </summary>
+        public string SanString { get; set; } = "";
+
+        /// <summary>
+        /// If this move came from a transcript, this is the original SAN string.
+        /// Otherwise this is empty.
         /// For simplicity, this is assigned in an optional constructor.
         /// </summary>
-        public string SanString { get; set; }
+        public string OriginalSanString { get; set; }
 
         /// <summary>
         /// If this was a pawn promotion move, what did the pawn get promoted to?
@@ -69,7 +75,7 @@ namespace Rmays.ChessEngine
 
         public ChessMove(string san)
         {
-            SanString = san;
+            OriginalSanString = san;
         }
 
         /// <summary>
@@ -107,19 +113,7 @@ namespace Rmays.ChessEngine
             return result;
         }
 
-        /// <summary>
-        /// Return the move in short Standard Algebraic Notation (SAN).
-        /// Pawns don't include the 'P' prefix, and the starting square isn't included unless it's needed to be unambiguous among other possible moves.
-        /// KNOWN ISSUE: A move by itself can't be converted to SAN without knowing the state of the board,
-        ///   so the SAN string is assigned when the move is initialized (via constructor).
-        /// </summary>
-        /// <returns></returns>
-        public string ToSAN()
-        {
-            return SanString;
-        }
-
-        protected char GetPieceInitial(ChessPiece piece)
+        public char GetPieceInitial(ChessPiece piece)
         {
             if (Math.Abs((int)piece) == 2)
             {
@@ -128,7 +122,7 @@ namespace Rmays.ChessEngine
             return piece.ToString()[5];
         }
 
-        protected string GetPromotionPieceInitial(PromotionChessPiece piece)
+        public string GetPromotionPieceInitial(PromotionChessPiece piece)
         {
             if (Math.Abs((int)piece) == 2)
             {
@@ -150,6 +144,7 @@ namespace Rmays.ChessEngine
                 QueensideCastle = this.QueensideCastle,
                 PawnPromotedTo = this.PawnPromotedTo,
                 WasPieceCaptured = this.WasPieceCaptured,
+                OriginalSanString = this.OriginalSanString,
                 SanString = this.SanString
             };
         }
