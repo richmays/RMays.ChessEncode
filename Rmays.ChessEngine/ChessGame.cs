@@ -202,7 +202,7 @@ namespace Rmays.ChessEngine
                     var failedLines = 0;
                     foreach (var moveToken in fullMoves)
                     {
-                        if (moveToken.EndsWith("."))
+                        if (moveToken.EndsWith(".") || moveToken == "*")
                         {
                             // Move ID.  Don't process this.
                             continue;

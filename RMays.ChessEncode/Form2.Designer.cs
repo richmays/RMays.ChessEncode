@@ -34,6 +34,7 @@ namespace RMays.ChessEncode
             this.txtPGN = new System.Windows.Forms.TextBox();
             this.btnDecode = new System.Windows.Forms.Button();
             this.btnEncode = new System.Windows.Forms.Button();
+            this.txtOpenPGN = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -52,6 +53,7 @@ namespace RMays.ChessEncode
             // 
             // splitContainer1.Panel2
             // 
+            this.splitContainer1.Panel2.Controls.Add(this.txtOpenPGN);
             this.splitContainer1.Panel2.Controls.Add(this.txtPGN);
             this.splitContainer1.Panel2.Controls.Add(this.btnDecode);
             this.splitContainer1.Panel2.Controls.Add(this.btnEncode);
@@ -99,6 +101,16 @@ namespace RMays.ChessEncode
             this.btnEncode.UseVisualStyleBackColor = true;
             this.btnEncode.Click += new System.EventHandler(this.button1_Click);
             // 
+            // txtOpenPGN
+            // 
+            this.txtOpenPGN.Location = new System.Drawing.Point(3, 240);
+            this.txtOpenPGN.Name = "txtOpenPGN";
+            this.txtOpenPGN.Size = new System.Drawing.Size(75, 23);
+            this.txtOpenPGN.TabIndex = 3;
+            this.txtOpenPGN.Text = "Open PGN";
+            this.txtOpenPGN.UseVisualStyleBackColor = true;
+            this.txtOpenPGN.Click += new System.EventHandler(this.txtOpenPGN_Click);
+            // 
             // Form2
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -124,5 +136,6 @@ namespace RMays.ChessEncode
         private System.Windows.Forms.TextBox txtPGN;
         private System.Windows.Forms.Button btnDecode;
         private System.Windows.Forms.Button btnEncode;
+        private System.Windows.Forms.Button txtOpenPGN;
     }
 }
