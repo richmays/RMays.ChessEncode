@@ -28,6 +28,8 @@ namespace Rmays.ChessEngine
         protected int HalfMoveClock = 0;
         protected int FullMoves = 1;
 
+        public GameState CurrentGameState = GameState.InProgress;
+
         protected string GetCastleAbilityString()
         {
             var castlingRights =
@@ -897,6 +899,7 @@ namespace Rmays.ChessEngine
                 // Insufficient material; there's no legal moves, and the game is over.
                 // Jump out with no possible moves.
                 moves.Clear();
+                this.CurrentGameState = GameState.DrawInsufficientMaterial;
                 return moves;
             }
 

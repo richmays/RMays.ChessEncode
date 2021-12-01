@@ -95,7 +95,7 @@ namespace RMays.ChessEngine.Tests
         }
 
         [TestMethod]
-        public void OnlyFirstMoves()
+        public void Move20MoveXs()
         {
             var game = new ChessGame();
             for (int i = 0; i < 20; i++)
@@ -103,13 +103,57 @@ namespace RMays.ChessEngine.Tests
                 game.MakeMove(i);
             }
 
-            // Print the board after making 20 move 0s.
+            // Print the board after making 20 moves with ID X.
             game.PrintBoard();
 
             // Get the PGN.
             Console.WriteLine("{" + game.GetPGN() + "}");
         }
 
+        [DataTestMethod]
+        //[DataRow(0)] // Threefold repetition after move 13
+        //[DataRow(1)] // Insufficient material (KN vs K)
+        //[DataRow(2)] // Insufficient material (K v K)
+        //[DataRow(3)] // Insufficient material (K v K)
+        //[DataRow(4)] // Insufficient material (KN vs K)
+        //[DataRow(5)] // Black wins by checkmate
+        [DataRow(6)] // Stalemate
+        [DataRow(7)] // Threefold repetition / Fifty moves without progress
+        //[DataRow(8)] // Insufficient material (KB vs K)
+        [DataRow(9)] // Insufficient material (K v K)
+        //[DataRow(10)] // Insufficient material (KN vs K)
+        //[DataRow(11)] // Insufficient material (KN vs K)
+        //[DataRow(12)] // Insufficient material (KB vs K)
+        //[DataRow(13)] // Insufficient material (K vs K)
+        //[DataRow(14)] // Insufficient material (KB vs K)
+        //[DataRow(15)] // Stalemate
+        [DataRow(16)] // Black wins by checkmate (only 29 moves)
+        //[DataRow(17)] // Insufficient material (KB vs K)
+        //[DataRow(18)] // Stalemate
+        //[DataRow(19)] // White wins by checkmate
+        //[DataRow(20)] // Insufficient material (K vs K)
+        public void LongestRandomishGame(int increment)
+        {
+            var game = new ChessGame();
+            var i = 0;
+            var moveId = 0;
+            while(game.IsGameInProgress())
+            {
+                game.MakeMove(i);
+                i += increment;
+
+                // Safety
+                moveId++;
+                // Lichess has a limit of 600 ply (300 full moves).
+                if (moveId >= 610) break;
+            }
+
+            // Print the board after making all these moves.  (The game should be over!)
+            game.PrintBoard();
+
+            // Get the PGN.
+            Console.WriteLine("{" + game.GetPGN() + "}");
+        }
 
         #region PGN Games
 
