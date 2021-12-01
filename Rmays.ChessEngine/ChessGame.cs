@@ -51,10 +51,22 @@ namespace Rmays.ChessEngine
 
         public void MakeMove(int moveId)
         {
+            if (this.boardState.CurrentGameState != GameState.InProgress)
+            {
+                // Game is already over; jump out.
+                return;
+            }
+
             var possibleMoves = this.PossibleMoves();
-            var result = possibleMoves[moveId % possibleMoves.Count()];
-            this.boardState.TryMakeMove(result);
-            this.moves.Add(result);
+            if (possibleMoves.Count() == 0)
+            {
+                // No moves left!
+                return;
+            }
+            var move = possibleMoves[moveId % possibleMoves.Count()];
+            move.SanString = ComputeSanString(this.boardState, move);
+            this.boardState.TryMakeMove(move);
+            this.moves.Add(move);
         }
 
         public void LoadPGN(string pgn)
@@ -424,8 +436,8 @@ namespace Rmays.ChessEngine
                 }
             }
 
-            // We should never get here.
-            return "";
+            // If we try to make an invalid move, we'll get here.  Not a big deal.
+            return "?";
         }
 
         private ChessPiece GetPieceByInitial(ChessColor color, char firstInitial)
