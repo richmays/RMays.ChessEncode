@@ -155,6 +155,60 @@ namespace RMays.ChessEngine.Tests
             Console.WriteLine("{" + game.GetPGN() + "}");
         }
 
+        [TestMethod]
+        public void EncodeWithPlaintext()
+        {
+            var game = new ChessGame();
+            game.Encode("Some Text");
+
+            // Get the PGN.
+            Console.WriteLine("{" + game.GetPGN() + "}");
+        }
+
+        [TestMethod]
+        public void EncodeWithPlaintext_LongerText()
+        {
+            var game = new ChessGame();
+            game.Encode("Will the program decode this?  let's find out!");
+
+            // Get the PGN.
+            Console.WriteLine("{" + game.GetPGN() + "}");
+        }
+
+        [TestMethod]
+        public void DecodeFromPGn()
+        {
+            var pgn = "[Date \"30.11.2021\"]" + Environment.NewLine +
+"[UTCDate \"01.12.2021\"]" + Environment.NewLine +
+"[UTCTime \"01:23:43\"]" + Environment.NewLine +
+"[PlaintextLength \"9\"]" + Environment.NewLine +
+"1. b3 f5 2. a4 h6 3. c3 e6 4. f3 a5 5. b4 axb4 6. Kf2 Nf6 7. h4 Ng4 8. Ke1 Qf6 9. e4 ";
+
+            var result = ChessGame.Decode(pgn);
+            Assert.AreEqual("Some Text", result);
+        }
+
+        [TestMethod]
+        public void DecodeFromPGN_LongerText()
+        {
+            var pgn = "[Date \"30.11.2021\"]" + Environment.NewLine +
+"[UTCDate \"01.12.2021\"]" + Environment.NewLine +
+"[UTCTime \"01:23:43\"]" + Environment.NewLine +
+"[PlaintextLength \"46\"]" + Environment.NewLine +
+"1. b3 Na6 2. e3 b6 3. Na3 Nb4 4. Nf3 Nc6 5. Nc4 b5 6. Ng5 Bb7 7. d3 Rb8 8. Qf3 Ba6 9. Nh3 Nh6 10. Kd1 Nf5 11. Qh5 Nb4 12. d4 Nh6 13. Ne5 Bc8 14. Qg4 Na6 15. Qxg7 Rb6 16. Kd2 Nc5 17. g3 d6 18. Nf4 Ba6 19. Nxf7 e6 20. a3 Kd7 21. Qxh8 Ne4 22. Ke2 Be7 23. Qxd8 Bxd8 24. Bg2 Nf6 25. Ng5 Ke7 26. g4 Bc8 27. a4 Kf8 28. Nfxe6 Ke7 29. Kd3 Nd5 30. Nh3 Nf5 31. Nhf4 Nfxe3 32. Ra3 c5 33. Ne2 Nf5 34. b4 a6 35. Rb3 Ng7 36. Rg1 Ne3 37. Nxg7 Nd1 38. Kd2 Rb8 ";
+
+            var result = ChessGame.Decode(pgn);
+            Assert.AreEqual("Will the program decode this?  let's find out!", result);
+        }
+
+        [TestMethod]
+        public void EncodeGame_NoLength()
+        {
+            var pgn = @"1. Nf3 c5 { A04 Zukertort Opening: Sicilian Invitation } 2. d3 d6 3. Nbd2 Nc6 4. e4 g6 5. Be2 Bg7 6. O-O Nf6 7. Re1 O-O 8. Bf1 Bg4 9. h3 Bxf3 10. Nxf3 Nd7 11. c3 Rb8 12. d4 cxd4 13. cxd4 d5 14. Bf4 Rc8 15. e5 e6 16. a3 Na5 17. Rc1 Qb6 18. b4 Nc4 19. Qd3 a5 20. Qb3 axb4 21. axb4 Qb5 22. Nd2 Ndb6 23. Nb1 Qa4 24. Qxa4 Nxa4 25. Bxc4 dxc4 26. Nc3 Nb2 27. Ra1 Nd3 28. Re4 Ra8 29. Rb1 Ra3 30. Bd2 Rb3 31. Rxb3 cxb3 32. Re3 Nb2 33. Ne4 Nc4 34. Rxb3 Rd8 35. Be3 b5 36. Rc3 Ra8 37. Nd6 Ra1+ 38. Kh2 Rb1 39. Nxc4 bxc4 40. Rxc4 h5 41. Rc8+ Kh7 42. Rb8 f6 43. Rb7 fxe5 44. dxe5 g5 45. Bxg5 Kg6 46. Bf4 Bh8 47. h4 Kf5 48. Bg3 Bxe5 49. Rb5 Kg4 50. Rxe5 Rh1+ 51. Kxh1 { Draw by stalemate. } 1/2-1/2";
+            var result = ChessGame.Decode(pgn);
+            Console.WriteLine(result);
+        }
+
         #region PGN Games
 
         private static string gameCheckmateWhite = @"[Event ""Rated Bullet game""]

@@ -1,6 +1,8 @@
-﻿using System;
+﻿using RMays.ChessEncode.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -46,7 +48,104 @@ namespace Rmays.ChessEngine
             boardState.Initialize();
             moves = new List<ChessMove>();
             gameState = GameState.InProgress;
-            pgnValues = new Dictionary<string, string>();
+            pgnValues = new Dictionary<string, string>
+            {
+                { "Date", DateTime.Now.ToString("dd.MM.yyyy") },
+                { "UTCDate", DateTime.UtcNow.ToString("dd.MM.yyyy") },
+                { "UTCTime", DateTime.UtcNow.ToString("hh:mm:ss") }
+            };
+        }
+
+        public void Encode(string plaintext)
+        {
+            pgnValues.Add("PlaintextLength", $"{plaintext.Length}");
+            var messageLength = plaintext.Length;
+            var numerator = TextEncoder.GetNumeratorFromBase64(TextEncoder.EncodeToBase64(plaintext));
+            var denominator = BigInteger.Pow(256, messageLength);
+
+            BigInteger runningDenominator = BigInteger.One;
+            BigInteger goalDenominator = 2 * BigInteger.Pow(256, messageLength) + 1;
+
+            //var chessMoves = new List<int>();
+            var bigFraction = new BigFraction(numerator, denominator);
+            while (bigFraction > 0 && runningDenominator < goalDenominator)
+            {
+                if (boardState.IsGameOver(out var dummy))
+                {
+                    break;
+                }
+                var possibleMoves = boardState.PossibleMoves();
+                var chunkSize = possibleMoves.Count();
+                bigFraction *= chunkSize;
+                runningDenominator *= chunkSize;
+                var nextValue = (int)bigFraction.ReduceToFractionalPart();
+                this.MakeMove(nextValue);
+            }
+        }
+
+        public static string Decode(string pgn)
+        {
+            var game = new ChessGame();
+            game.LoadPGN(pgn);
+            var gameInProgress = new ChessGame();
+            var plaintextLength = game.pgnValues.ContainsKey("PlaintextLength") ? int.Parse(game.pgnValues["PlaintextLength"]) : 0;
+
+            BigInteger numerator = BigInteger.Zero;
+            BigInteger denominator = BigInteger.One;
+            BigInteger goalDenominator = BigInteger.Pow(256, plaintextLength);
+            var moveId = 0;
+            while (gameInProgress.IsGameInProgress() && moveId < game.moves.Count() && (denominator < goalDenominator || goalDenominator == 1))
+            {
+                var possibleMoves = gameInProgress.boardState.PossibleMoves();
+                var found = false;
+                for (int i = 0; i < possibleMoves.Count(); i++)
+                {
+                    if (possibleMoves[i].ToString() == game.moves[moveId].ToString())
+                    {
+                        found = true;
+                        // Found the move!  ID is 'i'.
+                        numerator = numerator * possibleMoves.Count() + i;
+                        denominator *= possibleMoves.Count();
+                        gameInProgress.MakeMove(i);
+                        moveId++;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    Console.WriteLine($"Error: Move wasn't found in the list: {game.moves[moveId]}");
+                    Console.WriteLine("Possible moves:");
+                    foreach(var move in possibleMoves)
+                    {
+                        Console.WriteLine($"  {move}");
+                    }
+                    throw new ApplicationException("Error: Move not found in list.");
+                }
+            }
+
+            // We have a big numerator and denominator.
+            // Turn it into a string by peeling off 256 at a time.
+            var result = "";
+            var bigFraction = new BigFraction(numerator, denominator);
+
+            for (int i = 0; i < (plaintextLength == 0 ? 1000 : plaintextLength); i++)
+            //while(!bigFraction.IsZero())
+            {
+                bigFraction *= 256;
+                var c = (char)bigFraction.ReduceToFractionalPart();
+                result = $"{result}{c}";
+            }
+
+            // 'Hack' / Fix:
+            // The last character has to be incremented by 1.
+            // I'm not exactly sure why.  Something about finding a fraction between two other fractions,
+            // where all 3 fractions have different denominators.
+            if (plaintextLength > 0)
+            {
+                result = $"{result.Substring(0, result.Length - 1)}{(char)(result[result.Length - 1] + 1)}";
+            }
+
+            return result;
         }
 
         public void MakeMove(int moveId)
@@ -71,6 +170,7 @@ namespace Rmays.ChessEngine
 
         public void LoadPGN(string pgn)
         {
+            pgnValues.Clear();
             foreach(var line in pgn.Split('\r').Select(x => x.Trim()).Where(x => x!=string.Empty))
             {
                 if (line[0] == '[')
@@ -143,6 +243,11 @@ namespace Rmays.ChessEngine
         public string GetPGN()
         {
             var result = "";
+            foreach(var kvp in this.pgnValues)
+            {
+                result += $"[{kvp.Key} \"{kvp.Value}\"]{Environment.NewLine}";
+            }
+
             for (int i = 0; i < moves.Count(); i++)
             {
                 if (i % 2 == 0)
