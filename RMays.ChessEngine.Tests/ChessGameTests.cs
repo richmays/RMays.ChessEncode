@@ -118,16 +118,16 @@ namespace RMays.ChessEngine.Tests
         //[DataRow(4)] // Insufficient material (KN vs K)
         //[DataRow(5)] // Black wins by checkmate
         [DataRow(6)] // Stalemate
-        [DataRow(7)] // Threefold repetition / Fifty moves without progress
+        //[DataRow(7)] // Threefold repetition / Fifty moves without progress
         //[DataRow(8)] // Insufficient material (KB vs K)
-        [DataRow(9)] // Insufficient material (K v K)
+        //[DataRow(9)] // Insufficient material (K v K)
         //[DataRow(10)] // Insufficient material (KN vs K)
         //[DataRow(11)] // Insufficient material (KN vs K)
         //[DataRow(12)] // Insufficient material (KB vs K)
         //[DataRow(13)] // Insufficient material (K vs K)
         //[DataRow(14)] // Insufficient material (KB vs K)
         //[DataRow(15)] // Stalemate
-        [DataRow(16)] // Black wins by checkmate (only 29 moves)
+        //[DataRow(16)] // Black wins by checkmate (only 29 moves)
         //[DataRow(17)] // Insufficient material (KB vs K)
         //[DataRow(18)] // Stalemate
         //[DataRow(19)] // White wins by checkmate

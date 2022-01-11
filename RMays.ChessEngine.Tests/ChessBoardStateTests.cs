@@ -1108,6 +1108,31 @@ WR WN WB WQ WK WB WN WR".Trim(), board.ToString().Trim());
             Assert.AreEqual(0, gameResult);
         }
 
+        /// <summary>
+        /// White king can't capture a piece to put itself in check,
+        /// even if it results in insufficient material.
+        /// </summary>
+        [TestMethod]
+        public void GetMoves_KB_vs_KB()
+        {
+            var board = new ChessBoardState();
+            board.Clear();
+            board.SetSideToMove(ChessColor.Black);
+            board.SetSpot(1, 1, ChessPiece.WhiteKing);
+            board.SetSpot(2, 2, ChessPiece.WhiteBishop);
+            board.SetSpot(3, 1, ChessPiece.BlackKing);
+            board.SetSpot(4, 6, ChessPiece.BlackBishop);
+
+            var expectedMoves = new List<string>
+            {
+                "Kc1-d1",
+                "Kc1-c2",
+                "Kc1-d2"
+            };
+
+            CheckPossibleMoves(board, expectedMoves);
+        }
+
         [TestMethod]
         public void GetMoves_InsufficientMaterial_KB_vs_KB()
         {
