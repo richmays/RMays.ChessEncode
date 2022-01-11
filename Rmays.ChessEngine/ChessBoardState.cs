@@ -893,6 +893,13 @@ namespace Rmays.ChessEngine
                 }
             }
 
+            // Jump out if we only want to return captures.
+            // This is used when determining if the king is in check.
+            if (onlyReturnCaptures)
+            {
+                return moves.Where(x => x.WasPieceCaptured).ToList();
+            }
+
             // Check for insufficient material.
             if (IsInsufficientMaterial(pieceFrequencies))
             {
@@ -901,13 +908,6 @@ namespace Rmays.ChessEngine
                 moves.Clear();
                 this.CurrentGameState = GameState.DrawInsufficientMaterial;
                 return moves;
-            }
-
-            // Jump out if we only want to return captures.
-            // This is used when determining if the king is in check.
-            if (onlyReturnCaptures)
-            {
-                return moves.Where(x => x.WasPieceCaptured).ToList();
             }
 
             // Reject moves that cause the current player's turn's king to be in check.
