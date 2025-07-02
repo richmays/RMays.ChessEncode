@@ -1,0 +1,40 @@
+Rich's ChessEncode
+
+Purpose: Encode any text or binary data into a chess game (or games), AND decode any chess game into text / binary.
+Assumptions: The chess game is in PGN format (list of moves in Standard Algebraic Notation, and some header information about the game itself).
+
+Background: ANY text or binary data can be turned into a large number; [the logarithm of the number is proportional to the length of the message.]  <-- Not true; the length of the message is proportional to the number itself, not its logarithm.
+To do this, we can convert the data into one big number.  (Q: Should we convert to base-64 as an intermediate step?  We probably don't need to.)
+(For example, if the plaintext is 'AA', this is (65*256) + 65, or 16,705.)
+
+But knowing the decimal value of 16,705 isn't enough to know what the plaintext value is; the original plaintext might've been 'AA______'
+(where '_' are 0-bytes).  If we passed the plaintext message length (2) with the encoded number (16,705), this corresponds with a unique plaintext ('AA').
+
+GIVEN: A chess game is a continuous pruning of a game tree.  Each player has a choice between 1 and up to about 250 moves; each move can be encoded as a
+fraction (eg. the white player can choose between 20 different moves, from 0 to 19.  If they choose move #4, this is encoded as 3/20.)  Sequential moves in the game
+are encoded similarly; a short game might look like the following:  3/20, 1/20, 5/27, 28/29, 0/15, etc.  NOTE: If the game is forced to end (there's no legal
+moves for the current player), then a new game should be started, continuing from where they left off.
+
+These fractions can be combined in a specific way to create a unique fraction that represents the game state up to that point.  If we take the first two
+moves (3/20 and 1/20), this is equivalent to 61/400.  In general, to combine two fractions a/b and c/d, we calculate (a*b + c)/(b*d).  This 61/400 value
+can be converted to a fraction: 0.1525; in other words, this 0.1525 value completely encodes the first two moves of the chess game.  Extending this, for each
+chess game, there exists a decimal in the range [0,1) to encode it.
+
+THEREFORE: It's theoretically possible to convert any text (or binary data) into a series of chess games.
+
+This program will attempt to do just that; it will accept any text, and will return a series of chess game in PGN format that encodes the text.
+It will also decode any decimal number into a chess game.  (You could see what the 'pi' chess game looks like, or 'e', or 'square root of 2', etc.)
+
+2021-08-09 M (but actually developed a couple weeks back)
+
+Finished the chess engine logic, other than checking for draws from insufficient material (King vs King, King vs Knight + King, King vs Bishop + King),
+and we aren't considering the 50-move or 75-move rules for draws.
+Let's fix this!  Let's declare draws from insufficient material.
+
+TODO: Display a WinForms chess board, import a game in PGN format, and show the pieces at any point in the game.
+Then, allow an import of any text string, and convert it into a series of PGN games that uniquely encode that string.
+Then, do the reverse; turn any collection of games into a text string.
+
+For now, focus on the MVP, and ONLY the MVP:
+- Plaintext -> PGN-format chess game
+- PGN-format chess game -> plaintext

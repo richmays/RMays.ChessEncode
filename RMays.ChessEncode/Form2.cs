@@ -44,21 +44,27 @@ namespace RMays.ChessEncode
 
         private async Task PostPGNString(string pgn)
         {
-            var values = new Dictionary<string, string>
-            {
-                { "pgn", pgn }
-            };
-            var content = new FormUrlEncodedContent(values);
-            var response = await client.PostAsync("https://lichess.org/import", content);
+            MessageBox.Show($"Copy the text in the right box, then paste into the browser window that pops up.");
+            System.Diagnostics.Process.Start($"https://lichess.org/paste");
+            return;
 
-            if (response.StatusCode == HttpStatusCode.RedirectMethod || response.StatusCode == HttpStatusCode.OK)
-            {
-                System.Diagnostics.Process.Start($"{response.RequestMessage.RequestUri}");
-            }
-            else
-            {
-                MessageBox.Show($"Error: Unexpected status code from server: {response.StatusCode}");
-            }
+            // Old; this used to work before Lichess added authentication / required cookies to the import endpoint.
+            //var values = new Dictionary<string, string>
+            //{
+            //    { "pgn", pgn },
+            //    { "pgnFile", "" }
+            //};
+            //var content = new FormUrlEncodedContent(values);
+            //var response = await client.PostAsync("https://lichess.org/import", content);
+
+            //if (response.StatusCode == HttpStatusCode.RedirectMethod || response.StatusCode == HttpStatusCode.OK)
+            //{
+            //    System.Diagnostics.Process.Start($"{response.RequestMessage.RequestUri}");
+            //}
+            //else
+            //{
+            //    MessageBox.Show($"Error: Unexpected status code from server: {response.StatusCode}");
+            //}
         }
     }
 }
